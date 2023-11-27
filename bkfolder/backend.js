@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -8,32 +9,22 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-async function loadQuestionSet() {
+app.get('/questions/:setId', async (req, res) => {
   try {
-    const filePath = path.join(__dirname, '../questionset.json');
+    const setId = req.params.setId;
+    const filePath = path.join(__dirname, '../question', setId + '.json');
     const data = await fs.promises.readFile(filePath, 'utf-8');
-    return JSON.parse(data);
+    const questions = JSON.parse(data);
+    res.json(questions);
   } catch (error) {
     console.error('질문 세트를 불러오는 중 오류가 발생했습니다:', error);
-    return {};
-  }
-}
-
-app.get('/questions/:setId', async (req, res) => {
-  const questionSets = await loadQuestionSet();
-  const setId = req.params.setId;
-  const questions = questionSets[setId];
-
-  if (questions) {
-    res.json(questions);
-  } else {
     res.status(404).send('질문 세트를 찾을 수 없습니다.');
   }
 });
 
 function saveAnswers(setId, answers) {
   const filename = `answers_${setId}.json`;
-  const filePath = path.join(__dirname, '../answers', filename);
+  const filePath = path.join(__dirname, '../answers', filename);  
 
   fs.writeFile(filePath, JSON.stringify(answers, null, 2), (err) => {
     if (err) {
@@ -43,7 +34,6 @@ function saveAnswers(setId, answers) {
     }
   });
 }
-
 
 app.post('/submit/:setId', (req, res) => {
   const setId = req.params.setId;

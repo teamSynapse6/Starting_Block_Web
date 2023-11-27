@@ -1,0 +1,26 @@
+
+.question-page-container {
+  padding: 20px;
+}
+
+.question-item {
+  margin-bottom: 15px;
+}
+
+.question-textarea {
+  width: 100%;
+  min-height: 80px;
+  margin-top: 10px;
+}
+
+.submit-button {
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: darkblue;
+}

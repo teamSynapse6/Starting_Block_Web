@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import './QuestionPageStyles.css';
 
 function QuestionPage() {
+  const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const params = useParams();
@@ -11,7 +13,9 @@ function QuestionPage() {
     const loadQuestions = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/questions/${params.setId}`);
-        setQuestions(response.data);
+        const data = response.data;
+        setTitle(data.title);
+        setQuestions(data.questions);
       } catch (error) {
         console.error('질문을 불러오는데 실패했습니다.', error);
       }
@@ -34,20 +38,22 @@ function QuestionPage() {
   };
 
   return (
-    <div>
+    <div className="question-page-container">
       <h1>질문 페이지</h1>
+      <h2>{title}</h2>
       {questions.map((question, index) => {
         const questionKey = Object.keys(question)[0];
         return (
-          <div key={index}>
+          <div key={index} className="question-item">
             <h3>{question[questionKey]}</h3>
             <textarea
               onChange={(e) => handleAnswerChange(questionKey, e.target.value)}
+              className="question-textarea"
             ></textarea>
           </div>
         );
       })}
-      <button onClick={handleSubmit}>제출</button>
+      <button onClick={handleSubmit} className="submit-button">제출</button>
     </div>
   );
 }

@@ -8,8 +8,8 @@ function QuestionPage() {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [requestions, setRequestions] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({ requestionAnswers: {}, questionAnswers: {} });
+  const [newquestions, setNewQuestions] = useState([]);
+  const [answers, setAnswers] = useState({ requestionAnswers: {}, newquestionAnswers: {} });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const params = useParams();
   const [expandedRequestion, setExpandedRequestion] = useState(null);
@@ -63,7 +63,7 @@ function QuestionPage() {
         const data = response.data;
         setTitle(data.title);
         setAddress(data.address); // 추가된 주소 상태
-        setQuestions(data.questions);
+        setNewQuestions(data.newquestions);
         setRequestions(data.requestions); // 추가된 재발송 질문 상태
       } catch (error) {
         console.error('질문을 불러오는데 실패했습니다.', error);
@@ -89,7 +89,7 @@ function QuestionPage() {
     if (value.trim() !== '') {
       if (questionType === 'requestionAnswers') {
         setClickedReQuestions({ ...clickedReQuestions, [questionKey]: true });
-      } else if (questionType === 'questionAnswers') {
+      } else if (questionType === 'newquestionAnswers') {
         setClickedNewQuestions({ ...clickedNewQuestions, [questionKey]: true });
       }
     }
@@ -103,11 +103,11 @@ function QuestionPage() {
     }, 3000); // 토스트 메시지는 3초 후에 사라집니다.
   };
 
+
   const saveAnswer = (questionKey) => {
     // questionKey를 기반으로 질문 유형을 결정합니다.
-    const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'questionAnswers';
+    const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'newquestionAnswers';
     const answer = answers[questionType][questionKey]?.trim();
-    
 
     if (!answer) {
       showToast('답변을 입력해주세요.'); // 답변이 비어 있을 경우 메시지를 표시합니다.
@@ -115,7 +115,7 @@ function QuestionPage() {
       // 답변을 게시합니다.
       axios.post(`http://localhost:3001/submit/${params.setId}`, {
         requestionAnswers: answers.requestionAnswers,
-        questionAnswers: answers.questionAnswers
+        newquestionAnswers: answers.newquestionAnswers
       })
         .then(() => {
           showToast('답변이 저장되었습니다.'); // 성공 메시지를 표시합니다.
@@ -127,22 +127,12 @@ function QuestionPage() {
     }
   };
 
-
-  const handleSubmit = async () => {
-    try {
-      await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
-      alert('답변이 제출되었습니다.');
-    } catch (error) {
-      console.error('답변 제출에 실패했습니다.', error);
-    }
-  };
-
   const submitResendRequest = async (questionKey, questionType) => {
     try {
       // 질문 유형에 따라 적절한 답변 상태를 업데이트
       const updatedAnswers = {
         ...answers[questionType],
-        [questionKey]: '재발송 예정 질문입니다.'
+        [questionKey]: '재발송 예정'
       };
 
       // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
@@ -167,10 +157,42 @@ function QuestionPage() {
   };
 
 
+
   function autoResizeTextarea(event) {
     event.target.style.height = 'auto'; // 높이를 자동으로 설정하여 현재 텍스트 높이에 맞게 조정합니다.
     event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
   }
+
+  const saveAllAnswers = async () => {
+    // 모든 답변이 완료되었는지 확인
+    const incompleteReQuestions = requestions.filter((question) => {
+      const questionKey = Object.keys(question)[0];
+      const answer = answers.requestionAnswers[questionKey]?.trim();
+      return !answer;
+    });
+
+    const incompleteNewQuestions = newquestions.filter((question) => {
+      const questionKey = Object.keys(question)[0];
+      const answer = answers.newquestionAnswers[questionKey]?.trim();
+      return !answer;
+    });
+
+    const totalIncompleteQuestions = incompleteReQuestions.length + incompleteNewQuestions.length;
+
+    if (totalIncompleteQuestions > 0) {
+      await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
+      // 답변이 입력되지 않은 질문이 있을 경우 알림창 띄우기
+      alert(`답변이 제출되었습니다.\n답변이 없는 ${totalIncompleteQuestions}개의 질문은 다음날 재발송드립니다.`);
+    } else {
+      try {
+        await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
+        alert('답변이 제출되었습니다.');
+      } catch (error) {
+        console.error('답변 제출에 실패했습니다.', error);
+      }
+    }
+  };
+
 
 
 
@@ -295,12 +317,12 @@ function QuestionPage() {
             <div className="divider-line"></div>
             <div className="header-textbox-answer">답변</div>
           </div>
-          {questions.map((question, index) => {
+          {newquestions.map((question, index) => {
             const questionKey = Object.keys(question)[0];
             const isExpanded = expandedNewQuestion === questionKey;
-            const currentAnswer = answers.questionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
+            const currentAnswer = answers.newquestionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
             const isClicked = clickedNewQuestions[questionKey]; // 클릭 상태 확인
-            const hasAnswer = !!answers.questionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
+            const hasAnswer = !!answers.newquestionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
             return (
               <div key={index} className="container">
                 <div className="question-container">
@@ -340,10 +362,10 @@ function QuestionPage() {
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
                       value={currentAnswer} // textarea의 value를 상태와 연결
-                      onChange={(e) => handleAnswerChange('questionAnswers', questionKey, e.target.value)}
+                      onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'questionAnswers')} className="button next-mail">다음에 답하기</div>
+                    <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
                     <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
                   </div>
                 </div>
@@ -358,7 +380,7 @@ function QuestionPage() {
           <div className="done-text1">소중한 답변 감사합니다</div>
           <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
           <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          <div onClick={handleSubmit} className="done-button">모든 답변 완료</div>
+          <div onClick={saveAllAnswers} className="done-button">모든 답변 완료</div>
         </div>
       </div>
 
@@ -371,7 +393,7 @@ function QuestionPage() {
               <a href="https://www.facebook.com/withstartingblock?mibextid=LQQJ4d" target="_blank" rel="noreferrer noopener">
                 <img src="/images/facebook_logo.png" alt="Facebook" className="social-icon" />
               </a>
-              <a href="https://www.instagram.com/startingblock_?igsh=YjUxZHh6OTNnZDVp&utm_source=qr" target="_blank" rel="noreferrer noopener">
+              <a href="https://www.instagram.com/startingblock_official?igsh=YjUxZHh6OTNnZDVp&utm_source=qr" target="_blank" rel="noreferrer noopener">
                 <img src="/images/instagram_logo.png" alt="Instagram" className="social-icon" />
               </a>
             </div>

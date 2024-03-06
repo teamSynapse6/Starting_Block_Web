@@ -1,26 +1,1220 @@
+/* 화면 너비가 1280px 이상일 때 적용되는 스타일 */
+@media (min-width: 1280px) {
 
-.question-page-container {
-  padding: 20px;
+  .header-container,
+  .nav-container,
+  .done-container,
+  .footer-container {
+    width: 1120px;
+    margin: 0 auto;
+  }
+
+  .nav-container {
+    margin-bottom: 52px;
+  }
+
+  .notice-text {
+    width: calc(100% - 142px);
+  }
+
+  .notice-button {
+    width: 142px;
+  }
+
+  .banner {
+    margin-top: 52px;
+  }
+
+  .done-container {
+    margin-top: 60px;
+    margin-bottom: 60px;
+  }
+}
+
+/* 화면 너비가 1024px 이상, 1279px 이하일 때 적용되는 스타일 */
+@media (min-width: 1024px) and (max-width: 1280px) {
+
+  body {
+    padding-right: 80px;
+    padding-left: 80px;
+  }
+
+  .header-container,
+  .nav-container,
+  .done-container,
+  .footer-container {
+    width: calc(100% - 160px);
+    margin: 0 auto;
+  }
+
+  .nav-container {
+    margin-bottom: 52px;
+  }
+
+  .notice-text {
+    width: calc(100% - 142px);
+  }
+
+  .notice-button {
+    width: 142px;
+  }
+
+  .banner {
+    margin-top: 52px;
+  }
+
+  .done-container {
+    margin-top: 60px;
+    margin-bottom: 60px;
+  }
+}
+
+/* 화면 너비가 912px 이상, 1023px 이하일 때 적용되는 스타일 */
+@media (min-width: 912px) and (max-width: 1024px) {
+
+  .header-container,
+  .nav-container,
+  .done-container,
+  .footer-container {
+    width: 864px;
+    margin: 0 auto;
+  }
+
+  .nav-container {
+    margin-bottom: 52px;
+  }
+
+  .notice-text {
+    width: calc(100% - 142px);
+  }
+
+  .notice-button {
+    width: 142px;
+  }
+
+  .banner {
+    margin-top: 52px;
+  }
+
+  .done-container {
+    margin-top: 60px;
+    margin-bottom: 60px;
+  }
+}
+
+/* 화면 너비가 600px 이상, 911px 이하일 때 적용되는 스타일 */
+@media (min-width: 600px) and (max-width: 911.5px) {
+  body {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .header-container,
+  .nav-container,
+  .done-container,
+  .footer-container {
+    width: calc(100% - 48px);
+    margin: 0 auto;
+  }
+
+  .nav-container {
+    margin-bottom: 40px;
+  }
+
+  .notice-text {
+    width: calc(100% - 142px);
+  }
+
+  .notice-button {
+    width: 142px;
+  }
+
+  .banner {
+    margin-top: 40px;
+  }
+
+  .done-container {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .sub-text {
+    display: none;
+  }
+}
+
+/* 화면 너비가 599px 이하일 때 적용되는 스타일 */
+@media (max-width: 600px) {
+  body {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .header-container,
+  .nav-container,
+  .done-container,
+  .footer-container {
+    width: calc(100% - 48px);
+    margin: 0 auto;
+  }
+
+  .nav-container {
+    margin-bottom: 40px;
+  }
+
+  .notice-text {
+    width: calc(100% - 71px);
+  }
+
+  .notice-button {
+    width: 71px;
+  }
+
+  .banner {
+    margin-top: 40px;
+  }
+
+  .banner-text {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .done-container {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .sub-text,
+  .banner-image {
+    display: none;
+  }
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard-Regular';
+}
+
+.header {
+  width: 100%;
+  height: 72px;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 36px;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+}
+
+.title {
+  font-family: 'S-CoreDream-9Black';
+  font-size: 18px;
+  color: #5E8BFF;
+  margin-left: 8px;
+}
+
+.nav {
+  background-color: #F6F7F8;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-container {
+  margin-top: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.notice {
+  width: 100%;
+  display: flex;
+  /* 상단 정렬로 변경 */
+}
+
+.notice-text {
+  font-family: 'S-CoreDream-3Light';
+  font-size: 20px;
+  color: #3D4144;
+  margin-right: 16px;
+}
+
+.notice-button {
+  height: 44px;
+  background-color: transparent;
+  border: 1px solid #B1C5F6;
+  border-radius: 20px;
+  font-family: 'Pretendard-Medium';
+  font-size: 14px;
+  color: #5E8BFF;
+  text-align: center;
+  line-height: 44px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  /* 부드러운 전환 효과를 위해 추가 */
+}
+
+.notice-button:hover {
+  background-color: #DDE1E5;
+  /* hover 상태일 때의 배경색 */
+}
+
+.notice-button:active {
+  background-color: #C6CBCE;
+  /* pressed 상태일 때의 배경색 */
+}
+
+.sub-text {
+  width: 100%;
+  margin-top: 28px;
+  font-size: 18px;
+  color: #707479;
+}
+
+.banner {
+  width: 100%;
+  background-color: white;
+  min-height: 84px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner-image {
+  width: 34.56px;
+  height: 52px;
+  margin-right: 32px;
+}
+
+.banner-text {
+  font-size: 16px;
+  line-height: 22px;
+  color: #707479;
+  text-align: center;
+}
+
+.done {
+  background-color: #F0F3FF;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.done-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 내부 요소들의 크기에 따라 크기가 결정됩니다. */
+}
+
+.done-text1 {
+  color: #3D4144;
+  font-size: 26px;
+  line-height: 44px;
+  margin-bottom: 8px;
+}
+
+.done-text2 {
+  color: #3D4144;
+  font-size: 16px;
+  line-height: 22px;
+  margin-bottom: 8px;
+}
+
+.done-text3 {
+  color: #707479;
+  font-size: 12px;
+  line-height: 16px;
+  margin-bottom: 24px;
+}
+
+.done-button {
+  width: 133px;
+  height: 44px;
+  background-color: #5E8BFF;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  font-family: 'Pretendard-Medium';
+  line-height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  /* 부드러운 전환 효과를 위해 추가 */
+}
+
+.done-button:hover {
+  background-color: #3255A4;
+  /* hover 상태일 때의 배경색 */
+}
+
+.done-button:active {
+  background-color: #213049;
+  /* pressed 상태일 때의 배경색 */
+}
+
+
+.footer {
+  background-color: #3D4144;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-container {
+  margin-top: 80px;
+  margin-bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 내부 요소들의 크기에 따라 크기가 결정됩니다. */
+}
+
+.newsletter {
+  width: 100%;
+  height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.newsletter-text {
+  font-family: 'S-CoreDream-5Medium';
+  font-size: 20px;
+  line-height: 28px;
+  color: #F1FCFF;
+}
+
+.social-icons {
+  display: flex;
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.social-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.credits {
+  width: 100%;
+  height: 75px;
+  border-top: 1px solid #707479;
+  color: #F3F4F6;
+  font-size: 12px;
+  line-height: 16px;
+  display: flex;
+  /* Flexbox 사용 */
+  align-items: flex-end;
+  /* 하단에 요소 정렬 */
+}
+
+.credits-container {
+  width: 100%;
+  height: 42px;
+}
+
+.credits-container1 {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  /* 시작 부분에 정렬 */
+}
+
+.credits-container2 {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  /* 끝 부분에 정렬 */
+}
+
+
+.credits a {
+  color: #F3F4F6;
+  text-decoration: underline;
+  margin-left: 24px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 화면 너비가 1280px 이상일 때 적용되는 스타일 */
+@media (min-width: 1280px) {
+
+  h1,
+  .header-container-list {
+    margin: 0 auto;
+    width: 1120px;
+  }
+
+  .container,
+  .question-detail-content,
+  .answer-detail-content {
+    width: 1120.5px;
+  }
+
+  .question-container,
+  .answer-container {
+    width: 50%;
+    /* 각 컨테이너가 전체 너비의 절반을 차지하도록 설정 */
+  }
+
+  .question-detail-content {
+    width: 100%;
+    height: 332px;
+    border-right: 0.5px solid #e0e0e0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .answer-detail-content {
+    width: 100%;
+    height: 332px;
+    border-left: 0.5px solid #e0e0e0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow-y: hidden;
+    /* 내부 요소가 넘칠 경우 스크롤바 숨기기 */
+  }
+
+  hr {
+    width: 1120px;
+  }
+
+  .answer-textarea {
+    width: 100%;
+    min-height: 216px;
+    max-height: 216px;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .main {
+    margin-top: 68px;
+    margin-bottom: 144px;
+  }
+}
+
+/* 화면 너비가 1024px 이상, 1279px 이하일 때 적용되는 스타일 */
+@media (min-width: 1024px) and (max-width: 1280px) {
+
+  h1,
+  .container,
+  .header-container-list,
+  .question-detail-content,
+  .answer-detail-content {
+    margin: 0 auto;
+    width: calc(100% - 160px);
+  }
+
+  .question-container,
+  .answer-container {
+    width: 50%;
+    /* 각 컨테이너가 전체 너비의 절반을 차지하도록 설정 */
+  }
+
+  .question-detail-content {
+    width: 100%;
+    height: 312px;
+    border-right: 0.5px solid #e0e0e0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .answer-detail-content {
+    width: 100%;
+    height: 312px;
+    border-left: 0.5px solid #e0e0e0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow-y: hidden;
+    /* 내부 요소가 넘칠 경우 스크롤바 숨기기 */
+  }
+
+  hr {
+    width: calc(100% - 160px);
+  }
+
+  .answer-textarea {
+    width: 100%;
+    min-height: 196px;
+    max-height: 196px;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .main {
+    margin-top: 68px;
+    margin-bottom: 144px;
+  }
+}
+
+/* 화면 너비가 912px 이상, 1023px 이하일 때 적용되는 스타일 */
+@media (min-width: 912px) and (max-width: 1024px) {
+
+  h1,
+  .header-container-list {
+    margin: 0 auto;
+    width: 864px;
+  }
+
+  .container,
+  .question-detail-content,
+  .answer-detail-content {
+    width: 865px;
+  }
+
+  .question-container,
+  .answer-container {
+    width: 50%;
+    /* 각 컨테이너가 전체 너비의 절반을 차지하도록 설정 */
+  }
+
+  .question-detail-content {
+    width: 100%;
+    height: 312px;
+    border-right: 0.5px solid #e0e0e0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .answer-detail-content {
+    width: 100%;
+    height: 312px;
+    border-left: 0.5px solid #e0e0e0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow-y: hidden;
+    /* 내부 요소가 넘칠 경우 스크롤바 숨기기 */
+  }
+
+  hr {
+    width: 864px;
+  }
+
+  .answer-textarea {
+    width: 384px;
+    min-height: 196px;
+    max-height: 196px;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .main {
+    margin-top: 68px;
+    margin-bottom: 144px;
+  }
+}
+
+/* 화면 너비가 600px 이상, 911px 이하일 때 적용되는 스타일 */
+@media (min-width: 600px) and (max-width: 911.5px) {
+
+  h1,
+  .container,
+  .header-container-list,
+  .question-detail-content,
+  .answer-detail-content {
+    flex-direction: column;
+    margin: 0 auto;
+    width: calc(100% - 48px);
+  }
+
+  .divider-line,
+  .header-textbox-answer {
+    display: none;
+  }
+
+  hr {
+    width: calc(100% - 48px);
+  }
+
+  .answer-item {
+    display: none !important;
+  }
+
+  .question-detail-content {
+    width: 100%;
+    height: 248px;
+    border-bottom: 0.5px solid #e0e0e0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  .answer-detail-content {
+    width: 100%;
+    min-height: 132px;
+    height: auto;
+    border-top: 0.5px solid #e0e0e0;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-bottom: 88px !important;
+  }
+
+  .answer-textarea {
+    width: 100%;
+    min-height: 16px;
+    max-height: calc(248px - 88px);
+    height: auto;
+    overflow-y: hidden;
+  }
+
+  .button.answer-complete,
+  .button.next-mail {
+    position: absolute;
+    bottom: 24px;
+  }
+
+  .main {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+}
+
+/* 화면 너비가 599px 이하일 때 적용되는 스타일 */
+@media (max-width: 600px) {
+
+  h1,
+  .container,
+  .header-container-list,
+  .question-detail-content,
+  .answer-detail-content {
+    flex-direction: column;
+    margin: 0 auto;
+    width: calc(100% - 48px);
+  }
+
+  .divider-line,
+  .header-textbox-answer {
+    display: none;
+  }
+
+  hr {
+    width: calc(100% - 48px);
+  }
+
+  .answer-item {
+    display: none !important;
+  }
+
+  .question-detail-content {
+    width: 100%;
+    height: 248px;
+    border-bottom: 0.5px solid #e0e0e0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  .answer-detail-content {
+    width: 100%;
+    min-height: 132px;
+    height: auto;
+    border-top: 0.5px solid #e0e0e0;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-bottom: 88px !important;
+  }
+
+  .answer-textarea {
+    width: 100%;
+    min-height: 16px;
+    max-height: calc(248px - 88px);
+    height: auto;
+    overflow-y: hidden;
+  }
+
+  .button.answer-complete,
+  .button.next-mail {
+    position: absolute;
+    bottom: 24px;
+  }
+
+  .main {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+}
+
+.hide {
+  display: none;
+}
+
+.question-item.clicked {
+  font-family: 'Pretendard-Regular';
+  /* 폰트 굵기 변경 */
+  color: #707479;
+}
+
+.answer-item.answered {
+  color: #707479;
+  /* 변경될 폰트 컬러 */
+}
+
+.container:active .question-item,
+.container:active .answer-item {
+  background-color: #F3F4F6;
+}
+
+hr {
+  margin-top: 52px;
+  margin-bottom: 64px;
+  height: 4px;
+  background: #EEF0F2;
+  border: none;
+}
+
+
+h1 {
+  margin: 0 auto 32px auto;
+  /* Centering horizontally, with space below */
+  font-size: 24px;
+  /* Size of the title text */
+  color: #3D4144;
+  /* Color of the text, adjust as needed */
+  font-family: 'S-CoreDream-5Medium';
+}
+
+/* 텍스트 박스를 감싸는 컨테이너 스타일 */
+.header-container-list {
+  display: flex;
+  /* Flexbox로 설정 */
+  justify-content: space-between;
+  margin: auto;
+  /* 중앙 정렬 */
+  border-bottom: 1px solid #f2f2f2;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+/* 구분선을 위한 새 클래스 추가 */
+.divider-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  /* 컨테이너의 중앙에 배치 */
+  border-left: 1px solid #f2f2f2;
+  /* 색상은 필요에 맞게 조정 */
+  transform: translateX(-50%);
+  /* 선을 중앙으로 정렬 */
+}
+
+/* 텍스트 박스 스타일 */
+.header-textbox-question,
+.header-textbox-answer {
+  flex: 1;
+  padding: 7px 7px 7px 16px;
+  /* 안쪽 여백 */
+  box-sizing: border-box;
+  /* 너비에 패딩 포함 */
+  background-color: #fff;
+  /* 배경색 */
+  font-size: 14px;
+  /* 글꼴 크기 */
+  font-family: 'Pretendard-SemiBold';
+  color: #3D4144;
+  /* 글꼴 색상 */
+}
+
+.container {
+  display: flex;
+  box-sizing: border-box;
+  height: auto;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.question-container,
+.answer-container {
+  box-sizing: border-box;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /* 세로 정렬 */
+}
+
+
+.list {
+  box-sizing: border-box;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+.question-item,
+.answer-item {
+  height: 34px;
+  line-height: 30px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 7px;
+  /* 안쪽 여백 설정 */
+  padding-bottom: 7px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  margin-bottom: 4px;
+  /* 리스트 항목 아래 간격 */
+  border-bottom: 1px solid #f2f2f2;
+  /* 하단에 구분선 추가 */
+  box-sizing: border-box;
+  /* border 포함하여 전체 크기 계산 */
+  font-size: 16px;
+  overflow: hidden;
+  /* 오버플로우된 텍스트 숨기기 */
+  white-space: nowrap;
+  /* 텍스트를 한 줄로 유지 */
+  text-overflow: ellipsis;
+  /* 넘치는 텍스트를 말줄임표로 표시 */
+  min-width: 0;
+  /* Flex container 내에서 축소 가능하게 설정 */
+  flex-shrink: 1;
+  /* 필요한 경우 줄어들 수 있게 설정 */
 }
 
 .question-item {
-  margin-bottom: 15px;
+  font-family: 'Pretendard-Bold';
+  color: #3D4144;
 }
 
-.question-textarea {
-  width: 100%;
-  min-height: 80px;
-  margin-top: 10px;
+.answer-item {
+  font-family: 'Pretendard-Regular';
+  color: #C6CBCE;
 }
 
-.submit-button {
-  padding: 10px 20px;
-  background-color: blue;
-  color: white;
+.answer-item.pending {
+  color: #B1C5F6;
+  /* "재발송 예정"일 때 폰트 컬러 */
+}
+
+.question-item span {
+  display: block;
+  /* 블록 레벨 요소로 설정 */
+  max-width: calc(100% - 40px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  /* 필요한 경우 줄어들 수 있게 설정 */
+  min-width: 0;
+  /* Flex container 내에서 축소 가능하게 설정 */
+}
+
+
+.item h3 {
+  overflow: hidden;
+  /* 텍스트가 넘칠 경우 숨김 */
+  white-space: nowrap;
+  /* 텍스트를 한 줄로 유지 */
+  text-overflow: ellipsis;
+  /* 넘치는 텍스트를 말줄임표로 표시 */
+  max-width: 90%;
+  /* 필요에 따라 조절 */
+}
+
+.hover-effect {
+  background-color: #DDE1E5;
+  /* 예시 색상, 원하는 대로 수정 가능 */
+}
+
+.button {
+  max-width: 100%;
+  /* 버튼 너비를 부모 요소에 맞게 조정 */
+}
+
+.icon {
+  width: 20px;
+  /* 아이콘 크기 설정 */
+  height: 20px;
+  display: inline-block;
+  /* 또는 block 등, 적절하게 설정 */
+  background-image: url('./Constants/images/icon_down.png');
+  background-size: cover;
+  /* 이미지가 요소를 꽉 채우도록 */
+  background-repeat: no-repeat;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.question-item .icon {
+  visibility: visible;
+  /* Only visible for questions */
+  margin-right: 8px;
+}
+
+.text-content {
+  flex-grow: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 8px;
+}
+
+.question-detail-content {
+  display: none;
+  display: flex;
+  overflow-y: auto;
+  padding-bottom: 44px;
+  padding-right: 26px;
+  padding-left: 44px;
+  font-size: 18px;
+  background-color: #F3F4F6;
+  font-size: 18px;
+  font-family: 'Pretendard-Medium';
+  color: #121212;
+  position: relative;
+  /* For absolute positioning of the button */
+  box-sizing: border-box;
+  overflow-y: auto;
+  /* 필요할 경우 스크롤 표시 */
+}
+
+.answer-detail-content {
+  display: none;
+  padding: 24px;
+  padding-bottom: 24px;
+  background-color: #F3F4F6;
+  font-size: 18px;
+  font-family: 'Pretendard-Medium';
+  position: relative;
+  /* For absolute positioning of the button */
+  box-sizing: border-box;
+  overflow-y: hidden;
+}
+
+.show-detail {
+  max-height: 500px;
+  /* 상세 내용이 표시될 때 최대 높이 */
+}
+
+/* 스크롤바 전체 스타일 */
+::-webkit-scrollbar {
+  width: 4px;
+  /* 스크롤바의 너비 */
+  margin-right: 14px;
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  /* 스크롤바 배경색 */
+}
+
+/* 스크롤바 핸들 (스크롤바 자체) */
+::-webkit-scrollbar-thumb {
+  background-color: #D9D9D9;
+  /* 스크롤바 색상 */
+  border-radius: none;
+  /* 스크롤바 모서리 둥글게 */
   border: none;
-  cursor: pointer;
+  /* 스크롤바 외곽선 (배경과 같은 색상으로) */
 }
 
-.submit-button:hover {
-  background-color: darkblue;
+/* 스크롤바 핸들이 호버됐을 때 */
+::-webkit-scrollbar-thumb:hover {
+  background: #D9D9D9;
+  /* 스크롤바 색상 변경 */
+}
+
+.detail-icon {
+  /* 아이콘 스타일 설정 */
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-image: url('./Constants/images/icon_up.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-top: 24px;
+  margin-left: -28px;
+  margin-right: 8px;
+  /* 아이콘과 텍스트 사이 간격 */
+}
+
+/* 답변 텍스트 에리어 플레이스홀더 스타일 (작성 전) */
+.answer-textarea::placeholder {
+  color: #C6CBCE;
+  /* 작성 전 폰트 컬러 */
+  font-family: 'Pretendard-Regular';
+}
+
+.answer-textarea {
+  resize: none;
+  /* 사용자가 크기 조절 못하도록 설정 */
+  height: auto;
+  /* 내용에 따라 높이 자동 조정 */
+  overflow-y: auto;
+  /* 내용이 넘칠 경우 세로 스크롤바 표시 */
+  box-sizing: border-box;
+  background-color: #F3F4F6;
+  border: none;
+  border-radius: none;
+  outline: none;
+  font-size: 18px;
+  font-family: 'Pretendard-Medium';
+  color: #121212;
+}
+
+.button.next-mail {
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  /* 부드러운 전환 효과를 위해 추가 */
+  position: absolute;
+  bottom: 24px;
+  right: 143px;
+  width: 129px;
+  height: 44px;
+  background-color: #F3F4F6;
+  color: #5E8BFF;
+  font-family: 'Pretendard-Medium';
+  border: 1px solid #5E8BFF;
+}
+
+.button.next-mail:hover {
+  background-color: #DDE1E5;
+}
+
+.button.next-mail:active {
+  background-color: #C6CBCE;
+}
+
+.button.answer-complete {
+  background-color: #5E8BFF;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  /* 부드러운 전환 효과를 위해 추가 */
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  /* Positioned to the right side */
+  width: 103px;
+  height: 44px;
+  font-family: 'Pretendard-Medium';
+}
+
+/* '답변 완료' 버튼 호버 시 스타일 */
+.button.answer-complete:hover {
+  background-color: #3255A4;
+  /* 호버시 배경색 */
+}
+
+/* '답변 완료' 버튼 클릭 시 스타일 */
+.button.answer-complete:active {
+  background-color: #213049;
+  /* 클릭시 배경색 */
+}
+
+
+/* Toast Popup Styles 추가 */
+.toast-container {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: #000000;
+  opacity: 50%;
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.toast-message {
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+
+/* 보임/안보임 상태를 위한 CSS 클래스 추가 */
+.show {
+  display: block;
+  /* 확장될 때 보임 */
+}
+
+.hide {
+  display: none;
+  /* 축소될 때 안 보임 */
 }

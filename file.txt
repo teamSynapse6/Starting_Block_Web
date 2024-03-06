@@ -21,3 +21,10 @@ React 프로젝트 폴더에서 npm start를 실행하여 애플리케이션을 
 이 단계들을 완료하면, 백엔드와 프론트엔드 애플리케이션이 실행될 준비가 완료됩니다. 추가적인 질문이나 지원이 필요하시면 언제든지 알려주세요. ​
 
 http://localhost:3000/questions/set1
+
+1.백엔드 열기
+cd bkfolder
+node backend.js
+2. 프론트 열기
+cd my-app
+npm start

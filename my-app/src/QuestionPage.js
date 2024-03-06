@@ -138,7 +138,7 @@ function QuestionPage() {
       // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
       const response = await axios.post(`http://localhost:3001/submit/${params.setId}`, {
         requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-        questionAnswers: questionType === 'questionAnswers' ? updatedAnswers : answers.questionAnswers
+        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
       });
 
       // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
@@ -158,33 +158,71 @@ function QuestionPage() {
 
 
 
-  function autoResizeTextarea(event) {
-    event.target.style.height = 'auto'; // 높이를 자동으로 설정하여 현재 텍스트 높이에 맞게 조정합니다.
-    event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
-  }
-
-  const saveAllAnswers = async () => {
+  const saveAllAnswers = async (event) => {
+    // 스크롤 방지 함수(만약 버튼 눌렀을 때 스크롤 되는 오류 발생하면 사용할 것)
+    //event.preventDefault();
     // 모든 답변이 완료되었는지 확인
     const incompleteReQuestions = requestions.filter((question) => {
       const questionKey = Object.keys(question)[0];
       const answer = answers.requestionAnswers[questionKey]?.trim();
-      return !answer;
+      const clicked = clickedReQuestions[questionKey];
+      // 답변이 비어 있고 '다음에 답하기' 버튼도 눌리지 않았을 경우 포함
+      return !answer && !clicked;
     });
 
     const incompleteNewQuestions = newquestions.filter((question) => {
       const questionKey = Object.keys(question)[0];
       const answer = answers.newquestionAnswers[questionKey]?.trim();
-      return !answer;
+      const clicked = clickedNewQuestions[questionKey];
+      // 답변이 비어 있고 '다음에 답하기' 버튼도 눌리지 않았을 경우 포함
+      return !answer && !clicked;
     });
 
     const totalIncompleteQuestions = incompleteReQuestions.length + incompleteNewQuestions.length;
 
     if (totalIncompleteQuestions > 0) {
-      await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
-      // 답변이 입력되지 않은 질문이 있을 경우 알림창 띄우기
-      alert(`답변이 제출되었습니다.\n답변이 없는 ${totalIncompleteQuestions}개의 질문은 다음날 재발송드립니다.`);
+      // 답변이 입력되지 않은 질문에 대해 "다음에 답하기"와 동일한 답변으로 설정하여 저장
+      const updatedReAnswers = {};
+      incompleteReQuestions.forEach((question) => {
+        const questionKey = Object.keys(question)[0];
+        updatedReAnswers[questionKey] = '재발송 예정';
+      });
+      const updatedNewAnswers = {};
+      incompleteNewQuestions.forEach((question) => {
+        const questionKey = Object.keys(question)[0];
+        updatedNewAnswers[questionKey] = '재발송 예정';
+      });
+
+      // 수정된 답변을 기존 답변 상태에 병합
+      const mergedReAnswers = { ...answers.requestionAnswers, ...updatedReAnswers };
+      const mergedNewAnswers = { ...answers.newquestionAnswers, ...updatedNewAnswers };
+
+      // 답변을 질문 순서와 동일한 순서로 저장
+      const sortedReAnswers = {};
+      requestions.forEach((question) => {
+        const questionKey = Object.keys(question)[0];
+        sortedReAnswers[questionKey] = mergedReAnswers[questionKey] || '';
+      });
+
+      const sortedNewAnswers = {};
+      newquestions.forEach((question) => {
+        const questionKey = Object.keys(question)[0];
+        sortedNewAnswers[questionKey] = mergedNewAnswers[questionKey] || '';
+      });
+
+      // 답변 저장
+      try {
+        await axios.post(`http://localhost:3001/submit/${params.setId}`, {
+          requestionAnswers: sortedReAnswers,
+          newquestionAnswers: sortedNewAnswers
+        });
+        alert(`답변이 제출되었습니다.\n답변이 없는 ${totalIncompleteQuestions}개의 질문은 다음날 재발송드립니다.`);
+      } catch (error) {
+        console.error('답변 제출에 실패했습니다.', error);
+      }
     } else {
       try {
+        // 모든 답변이 완료되었을 경우 답변 저장
         await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
         alert('답변이 제출되었습니다.');
       } catch (error) {
@@ -193,227 +231,24 @@ function QuestionPage() {
     }
   };
 
-
-
-
-
-
   return (
-    <>
-      <div className="header">
-        <div className="header-container">
-          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img src="/images/logo.png" alt="Logo" className="logo" />
-            <span className="title">스타팅블록</span>
-          </a>
-        </div>
-      </div>
-
-      <div className="nav">
-        <div className="nav-container">
-          <div className="intro">
-            <div className="intro">
-              <div className="notice">
-                <div className="notice-text">안녕하세요, 담당자님<br /><span style={{ fontFamily: 'S-CoreDream-5Medium' }}>'{title}'</span> 공고의 질문을 요약해서 보내드려요</div>
-                <a href={address} target="_blank" rel="noreferrer noopener" className="notice-button">
-                  {windowWidth <= 600 ? "공고 >" : "공고 확인하기 >"}
-                </a>
-              </div>
-              <div className="sub-text">저희 서비스는 중복된 질문들을 제외 처리하고, 유사 답변 제공 이후 담당자님께 질문 리스트를 발송합니다.<br />
-                담당자님의 중복되고, 많은 질문으로 인한 피로도를 낮추고자 합니다.</div>
-            </div>
+    <div className="question-page-container">
+      <h1>질문 페이지</h1>
+      <h2>{title}</h2>
+      {questions.map((question, index) => {
+        const questionKey = Object.keys(question)[0];
+        return (
+          <div key={index} className="question-item">
+            <h3>{question[questionKey]}</h3>
+            <textarea
+              onChange={(e) => handleAnswerChange(questionKey, e.target.value)}
+              className="question-textarea"
+            ></textarea>
           </div>
-          <div className="banner">
-            <img src="/images/chr_starter.png" alt="Character Starter" className="banner-image" />
-            <div className="banner-text">
-              답변의 확인이 필요한 질문은 <span style={{ color: '#5E8BFF' }}>다음에 답하기</span>를 눌러주세요.<br />
-              <span style={{ color: '#5E8BFF' }}>다음날 발송되는 질문 메일에 추가하여 발송해드립니다:)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div className="main">
-        {/* 재발송 질문 */}
-        <div>
-          <h1>재발송 질문</h1>
-          <div className="header-container-list">
-            <div className="header-textbox-question">질문</div>
-            <div className="divider-line"></div>
-            <div className="header-textbox-answer">답변</div>
-          </div>
-          {requestions.map((question, index) => {
-            const questionKey = Object.keys(question)[0];
-            const isExpanded = expandedRequestion === questionKey;
-            const currentAnswer = answers.requestionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
-            const isClicked = clickedReQuestions[questionKey]; // 이 질문이 클릭되었는지 확인
-            const hasAnswer = !!answers.requestionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
-            return (
-              <div key={index} className="container">
-                <div className="question-container">
-                  <div
-                    className={`list question-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleRequestion(questionKey);
-                      handleReQuestionClick(questionKey);
-                    }}>
-                    <div className={`item question-item ${isClicked ? 'clicked' : ''}`}>
-                      <span className="icon"></span>
-                      <span>{question[questionKey]}</span>
-                    </div>
-                  </div>
-                  <div
-                    className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
-                    onClick={() => toggleRequestion(questionKey)}>
-                    <span className="detail-icon"></span>
-                    <span>{question[questionKey]}</span>
-                    {/* 답변 목록 */}
-                  </div>
-                </div>
-                <div className="answer-container">
-                  <div
-                    key={index}
-                    className={`list answer-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleRequestion(questionKey);
-                      handleReQuestionClick(questionKey);
-                    }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''}`}>
-                      <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
-                    </div>
-                  </div>
-                  <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
-                    <textarea
-                      value={currentAnswer} // textarea의 value를 상태와 연결
-                      onChange={(e) => handleAnswerChange('requestionAnswers', questionKey, e.target.value)}
-                      onInput={autoResizeTextarea}
-                      className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'requestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 구분 선 */}
-        <hr />
-
-        <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
-          {toast.message}
-        </div>
-
-
-        {/* 신규 질문 */}
-        <div>
-          <h1>신규 질문</h1>
-          <div className="header-container-list">
-            <div className="header-textbox-question">질문</div>
-            <div className="divider-line"></div>
-            <div className="header-textbox-answer">답변</div>
-          </div>
-          {newquestions.map((question, index) => {
-            const questionKey = Object.keys(question)[0];
-            const isExpanded = expandedNewQuestion === questionKey;
-            const currentAnswer = answers.newquestionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
-            const isClicked = clickedNewQuestions[questionKey]; // 클릭 상태 확인
-            const hasAnswer = !!answers.newquestionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
-            return (
-              <div key={index} className="container">
-                <div className="question-container">
-                  <div
-                    className={`list question-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleNewQuestion(questionKey); // 토글 함수 호출
-                      handleNewQuestionClick(questionKey); // 클릭 처리 함수 호출
-                    }}>
-                    <div className={`question-item ${isClicked ? 'clicked' : ''}`}>
-                      <span className="icon"></span>
-                      <span>{question[questionKey]}</span>
-                    </div>
-                  </div>
-                  <div
-                    className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
-                    onClick={() => toggleNewQuestion(questionKey)}>
-                    <span className="detail-icon"></span>
-                    <span>{question[questionKey]}</span>
-                    {/* 답변 목록 */}
-                  </div>
-                </div>
-                <div className="answer-container">
-                  <div
-                    key={index}
-                    className={`list answer-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleNewQuestion(questionKey)
-                      handleNewQuestionClick(questionKey);
-                    }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''}`}>
-                      <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
-                    </div>
-                  </div>
-                  <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
-                    <textarea
-                      value={currentAnswer} // textarea의 value를 상태와 연결
-                      onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
-                      className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="done">
-        <div className="done-container">
-          <div className="done-text1">소중한 답변 감사합니다</div>
-          <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
-          <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          <div onClick={saveAllAnswers} className="done-button">모든 답변 완료</div>
-        </div>
-      </div>
-
-
-      <div className="footer">
-        <div className="footer-container">
-          <div className="newsletter">
-            <div className="newsletter-text">스타팅블록</div>
-            <div className="social-icons">
-              <a href="https://www.facebook.com/withstartingblock?mibextid=LQQJ4d" target="_blank" rel="noreferrer noopener">
-                <img src="/images/facebook_logo.png" alt="Facebook" className="social-icon" />
-              </a>
-              <a href="https://www.instagram.com/startingblock_official?igsh=YjUxZHh6OTNnZDVp&utm_source=qr" target="_blank" rel="noreferrer noopener">
-                <img src="/images/instagram_logo.png" alt="Instagram" className="social-icon" />
-              </a>
-            </div>
-          </div>
-
-          <div className="credits">
-            <div className="credits-container">
-              <div className="credits-container1">
-                2024 스타팅블록. All rights reserved.
-              </div>
-              <div className="credits-container2">
-                <a href="#">이용약관</a>
-                <a href="#">개인정보처리방침</a>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </>
+        );
+      })}
+      <button onClick={handleSubmit} className="submit-button">제출</button>
+    </div>
   );
 }
 

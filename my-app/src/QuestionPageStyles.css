@@ -933,6 +933,11 @@ h1 {
   color: #C6CBCE;
 }
 
+.answer-item.pending {
+  color: #B1C5F6;
+  /* "재발송 예정"일 때 폰트 컬러 */
+}
+
 .question-item span {
   display: block;
   /* 블록 레벨 요소로 설정 */

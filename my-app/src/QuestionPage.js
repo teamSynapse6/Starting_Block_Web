@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom';
 import './QuestionPageStyles.css';
 import './Constants/Font_style.css';
 
+
+
 function QuestionPage() {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
@@ -18,7 +20,10 @@ function QuestionPage() {
   const [clickedReQuestions, setClickedReQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
 
+  //API 연동을 위한 기본 정의
+ const baseUrl = "http://localhost:3001";
 
+  
   // 재발송 질문 클릭 처리 함수
   const handleReQuestionClick = (questionKey) => {
     setClickedReQuestions({
@@ -56,24 +61,31 @@ function QuestionPage() {
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
-
+  
     const loadQuestions = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/questions/${params.setId}`);
+        const response = await axios.get(`${baseUrl}/questions/${params.setId}`);
         const data = response.data;
         setTitle(data.title);
-        setAddress(data.address); // 추가된 주소 상태
-        setNewQuestions(data.newquestions);
-        setRequestions(data.requestions); // 추가된 재발송 질문 상태
+        setAddress(data.address);
+  
+        // 변경된 데이터 구조에 따라 질문과 답변을 처리
+        const { requestions, newquestions } = data.questions;
+        const loadedAnswers = data.answers;
+  
+        setRequestions(Object.entries(requestions).map(([key, value]) => ({ [key]: value })));
+        setNewQuestions(Object.entries(newquestions).map(([key, value]) => ({ [key]: value })));
+        setAnswers(loadedAnswers);
       } catch (error) {
         console.error('질문을 불러오는데 실패했습니다.', error);
       }
     };
-
+  
     loadQuestions();
-
+  
     return () => window.removeEventListener('resize', handleResize);
   }, [params.setId]);
+  
 
   const handleAnswerChange = (questionType, questionKey, value) => {
     // 기존 답변 상태 업데이트
@@ -113,7 +125,7 @@ function QuestionPage() {
       showToast('답변을 입력해주세요.'); // 답변이 비어 있을 경우 메시지를 표시합니다.
     } else {
       // 답변을 게시합니다.
-      axios.post(`http://localhost:3001/submit/${params.setId}`, {
+      axios.post(`${baseUrl}/submit/${params.setId}`, {
         requestionAnswers: answers.requestionAnswers,
         newquestionAnswers: answers.newquestionAnswers
       })
@@ -136,7 +148,7 @@ function QuestionPage() {
       };
 
       // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
-      const response = await axios.post(`http://localhost:3001/submit/${params.setId}`, {
+      const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
         requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
         newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
       });
@@ -236,7 +248,7 @@ function QuestionPage() {
 
       // 답변 저장
       try {
-        await axios.post(`http://localhost:3001/submit/${params.setId}`, {
+        await axios.post(`${baseUrl}/submit/${params.setId}`, {
           requestionAnswers: sortedReAnswers,
           newquestionAnswers: sortedNewAnswers
         });
@@ -247,7 +259,7 @@ function QuestionPage() {
     } else {
       try {
         // 모든 답변이 완료되었을 경우 답변 저장
-        await axios.post(`http://localhost:3001/submit/${params.setId}`, answers);
+        await axios.post(`${baseUrl}/submit/${params.setId}`, answers);
         alert('답변이 제출되었습니다.');
       } catch (error) {
         console.error('답변 제출에 실패했습니다.', error);
@@ -256,19 +268,10 @@ function QuestionPage() {
   };
 
 
-
-
-
-
-
-
   function autoResizeTextarea(event) {
     event.target.style.height = 'auto'; // 높이를 자동으로 설정하여 현재 텍스트 높이에 맞게 조정합니다.
     event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
   }
-
-
-
 
 
   return (
@@ -374,9 +377,7 @@ function QuestionPage() {
           })}
         </div>
 
-        {/* 구분 선 */}
         <hr />
-
         <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
           {toast.message}
         </div>

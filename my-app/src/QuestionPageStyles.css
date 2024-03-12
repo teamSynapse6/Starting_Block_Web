@@ -359,6 +359,7 @@ body {
   height: 44px;
   background-color: #5E8BFF;
   border-radius: 20px;
+  border: 0;
   color: white;
   font-size: 14px;
   font-family: 'Pretendard-Medium';
@@ -372,11 +373,13 @@ body {
 }
 
 .done-button:hover {
+  border: 0;
   background-color: #3255A4;
   /* hover 상태일 때의 배경색 */
 }
 
 .done-button:active {
+  border: 0;
   background-color: #213049;
   /* pressed 상태일 때의 배경색 */
 }

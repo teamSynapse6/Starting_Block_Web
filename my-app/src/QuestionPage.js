@@ -160,37 +160,61 @@ function QuestionPage() {
 
   const saveAllAnswers = async (event) => {
     // 스크롤 방지 함수(만약 버튼 눌렀을 때 스크롤 되는 오류 발생하면 사용할 것)
-    //event.preventDefault();
-    // 모든 답변이 완료되었는지 확인
-    const incompleteReQuestions = requestions.filter((question) => {
-      const questionKey = Object.keys(question)[0];
-      const answer = answers.requestionAnswers[questionKey]?.trim();
-      const clicked = clickedReQuestions[questionKey];
-      // 답변이 비어 있고 '다음에 답하기' 버튼도 눌리지 않았을 경우 포함
-      return !answer && !clicked;
+    event.preventDefault();
+
+    // '재발송 예정'으로 표시된 질문의 수를 초기화합니다.
+    let unansweredReQuestionsCount = 0;
+    let unansweredNewQuestionsCount = 0;
+
+    // '재발송 예정'으로 표시된 답변 상태를 검사하고, 이를 카운트합니다.
+    Object.values(answers.requestionAnswers).forEach(answer => {
+      if (answer === '재발송 예정') {
+        unansweredReQuestionsCount++;
+      }
     });
 
-    const incompleteNewQuestions = newquestions.filter((question) => {
-      const questionKey = Object.keys(question)[0];
-      const answer = answers.newquestionAnswers[questionKey]?.trim();
-      const clicked = clickedNewQuestions[questionKey];
-      // 답변이 비어 있고 '다음에 답하기' 버튼도 눌리지 않았을 경우 포함
-      return !answer && !clicked;
+    Object.values(answers.newquestionAnswers).forEach(answer => {
+      if (answer === '재발송 예정') {
+        unansweredNewQuestionsCount++;
+      }
     });
 
-    const totalIncompleteQuestions = incompleteReQuestions.length + incompleteNewQuestions.length;
+    // 답변이 작성되지 않은 질문의 수를 추가합니다.
+    requestions.forEach((question) => {
+      const questionKey = Object.keys(question)[0];
+      if (!answers.requestionAnswers[questionKey]) {
+        unansweredReQuestionsCount++;
+      }
+    });
 
-    if (totalIncompleteQuestions > 0) {
-      // 답변이 입력되지 않은 질문에 대해 "다음에 답하기"와 동일한 답변으로 설정하여 저장
+    newquestions.forEach((question) => {
+      const questionKey = Object.keys(question)[0];
+      if (!answers.newquestionAnswers[questionKey]) {
+        unansweredNewQuestionsCount++;
+      }
+    });
+
+    // 모든 답변이 완료되었는지 확인합니다.
+    const totalUnansweredQuestions = unansweredReQuestionsCount + unansweredNewQuestionsCount;
+
+    if (totalUnansweredQuestions > 0) {
+      // 답변이 없는 질문에 대해 "다음에 답하기"와 동일한 답변으로 설정하여 저장
       const updatedReAnswers = {};
-      incompleteReQuestions.forEach((question) => {
-        const questionKey = Object.keys(question)[0];
-        updatedReAnswers[questionKey] = '재발송 예정';
-      });
       const updatedNewAnswers = {};
-      incompleteNewQuestions.forEach((question) => {
+
+      // '재발송 예정'으로 표시된 질문에 대해 답변을 설정합니다.
+      requestions.forEach((question) => {
         const questionKey = Object.keys(question)[0];
-        updatedNewAnswers[questionKey] = '재발송 예정';
+        if (!answers.requestionAnswers[questionKey]) {
+          updatedReAnswers[questionKey] = '재발송 예정';
+        }
+      });
+
+      newquestions.forEach((question) => {
+        const questionKey = Object.keys(question)[0];
+        if (!answers.newquestionAnswers[questionKey]) {
+          updatedNewAnswers[questionKey] = '재발송 예정';
+        }
       });
 
       // 수정된 답변을 기존 답변 상태에 병합
@@ -216,7 +240,7 @@ function QuestionPage() {
           requestionAnswers: sortedReAnswers,
           newquestionAnswers: sortedNewAnswers
         });
-        alert(`답변이 제출되었습니다.\n답변이 없는 ${totalIncompleteQuestions}개의 질문은 다음날 재발송드립니다.`);
+        alert(`답변이 제출되었습니다. \n답변이 없는 ${totalUnansweredQuestions}개의 질문은 다음날 재발송드립니다.`);
       } catch (error) {
         console.error('답변 제출에 실패했습니다.', error);
       }
@@ -230,6 +254,8 @@ function QuestionPage() {
       }
     }
   };
+
+
 
 
 

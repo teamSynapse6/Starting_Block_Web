@@ -1,8 +1,10 @@
 {
   "requestionAnswers": {
-    "Q1": "답변1"
+    "Q1": "aaaaaaa",
+    "Q2": "재발송 예정"
   },
-  "questionAnswers": {
-    "Q1": "신규 답변2"
+  "newquestionAnswers": {
+    "Q1": "재발송 예정",
+    "Q2": "재발송 예정"
   }
 }

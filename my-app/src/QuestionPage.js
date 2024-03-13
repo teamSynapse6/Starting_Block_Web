@@ -58,7 +58,7 @@ function QuestionPage() {
     }
   };
 
-  useEffect(() => {
+  useEffect(() => { //사이트 접속 시 데이터 초기 데이터 불러오는 메소드
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
   

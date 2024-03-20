@@ -781,6 +781,14 @@ body {
     bottom: 24px;
   }
 
+  /* 비활성화된 버튼에 대한 스타일 */
+.button.disabled {
+  color: #999; /* 비활성화된 텍스트 색상 */
+  background-color: #ccc; /* 비활성화된 배경색 */
+  cursor: not-allowed; /* 비활성화된 상태에서 포인터 변경 */
+}
+
+
   .main {
     margin-top: 40px;
     margin-bottom: 40px;

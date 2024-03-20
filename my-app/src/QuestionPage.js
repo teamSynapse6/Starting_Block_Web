@@ -116,6 +116,12 @@ function QuestionPage() {
   };
 
 
+  const isAnswered = (questionKey, questionType) => {
+    const answer = answers[questionType][questionKey];
+    return answer && answer.trim() !== ''; // 답변이 작성되었는지 여부를 반환합니다.
+  };
+
+
   const saveAnswer = (questionKey) => {
     // questionKey를 기반으로 질문 유형을 결정합니다.
     const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'newquestionAnswers';
@@ -139,34 +145,38 @@ function QuestionPage() {
     }
   };
 
-  const submitResendRequest = async (questionKey, questionType) => {
-    try {
-      // 질문 유형에 따라 적절한 답변 상태를 업데이트
-      const updatedAnswers = {
-        ...answers[questionType],
-        [questionKey]: '재발송 예정'
-      };
+  // '다음에 답하기' 버튼 클릭 시 호출되는 함수
+const submitResendRequest = async (questionKey, questionType) => {
+  try {
+    // 질문 유형에 따라 적절한 답변 상태를 업데이트
+    const updatedAnswers = {
+      ...answers[questionType],
+      [questionKey]: '재발송 예정'
+    };
 
-      // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
-      const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
-      });
+    // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
+    const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
+      requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
+      newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
+    });
 
-      // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
-      setAnswers({
-        ...answers,
-        [questionType]: updatedAnswers
-      });
+    // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
+    setAnswers({
+      ...answers,
+      [questionType]: updatedAnswers
+    });
 
-      // 성공 토스트 메시지 표시
-      showToast('이후 해당 질문을 재발송 하겠습니다.');
-    } catch (error) {
-      console.error('재발송 요청에 실패했습니다.', error);
-      // 실패 토스트 메시지 표시
-      showToast('재발송 요청에 실패했습니다.');
-    }
-  };
+    // 성공 토스트 메시지 표시
+    showToast('이후 해당 질문을 재발송 하겠습니다.');
+
+    // '답변완료' 버튼을 비활성화하기 위해 답변을 초기화합니다.
+    handleAnswerChange(questionType, questionKey, ''); // 빈 문자열로 답변 초기화
+  } catch (error) {
+    console.error('재발송 요청에 실패했습니다.', error);
+    // 실패 토스트 메시지 표시
+    showToast('재발송 요청에 실패했습니다.');
+  }
+};
 
 
 
@@ -369,7 +379,7 @@ function QuestionPage() {
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
                     <div onClick={() => submitResendRequest(questionKey, 'requestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                    <div onClick={() => saveAnswer(questionKey)} className={`button answer-complete ${!hasAnswer ? 'disabled' : ''}`}>답변 완료</div>
                   </div>
                 </div>
               </div>
@@ -440,7 +450,7 @@ function QuestionPage() {
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
                     <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                    <div onClick={() => saveAnswer(questionKey)} className={`button answer-complete ${!hasAnswer ? 'disabled' : ''}`}>답변 완료</div>
                   </div>
                 </div>
               </div>

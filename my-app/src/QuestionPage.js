@@ -5,7 +5,6 @@ import './QuestionPageStyles.css';
 import './Constants/Font_style.css';
 
 
-
 function QuestionPage() {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
@@ -21,9 +20,9 @@ function QuestionPage() {
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
 
   //API 연동을 위한 기본 정의
- const baseUrl = "http://localhost:3001";
+  const baseUrl = "http://localhost:3001";
 
-  
+
   // 재발송 질문 클릭 처리 함수
   const handleReQuestionClick = (questionKey) => {
     setClickedReQuestions({
@@ -61,18 +60,18 @@ function QuestionPage() {
   useEffect(() => { //사이트 접속 시 데이터 초기 데이터 불러오는 메소드
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
-  
+
     const loadQuestions = async () => {
       try {
         const response = await axios.get(`${baseUrl}/questions/${params.setId}`);
         const data = response.data;
         setTitle(data.title);
         setAddress(data.address);
-  
+
         // 변경된 데이터 구조에 따라 질문과 답변을 처리
         const { requestions, newquestions } = data.questions;
         const loadedAnswers = data.answers;
-  
+
         setRequestions(Object.entries(requestions).map(([key, value]) => ({ [key]: value })));
         setNewQuestions(Object.entries(newquestions).map(([key, value]) => ({ [key]: value })));
         setAnswers(loadedAnswers);
@@ -80,12 +79,12 @@ function QuestionPage() {
         console.error('질문을 불러오는데 실패했습니다.', error);
       }
     };
-  
+
     loadQuestions();
-  
+
     return () => window.removeEventListener('resize', handleResize);
   }, [params.setId]);
-  
+
 
   const handleAnswerChange = (questionType, questionKey, value) => {
     // 기존 답변 상태 업데이트

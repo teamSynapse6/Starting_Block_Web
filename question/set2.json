@@ -1,20 +1,7 @@
 {
-  "title": "[인천대학교 창업지원단] 2024년 예비창업패키지 대비 INU 스타트업 아카데미 교육생 모집",
-  "address": "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn=167282&page=1&schStr=regist&pbancEndYn=N",
-  "requestions": [
-    {
-      "Q1": "주로 선발되는 아이템은 무엇인가요?"
-    },
-    {
-      "Q2": "--?"
-    }
-  ],
-  "newquestions": [
-    {
-      "Q1": "해당 공고에 따른 대상을 선별하는 평가지표는 무엇인가요?"
-    },
-    {
-      "Q2": "~~?"
-    }
+  "title": "2023년 선발공고-2",
+  "questions": [
+    {"Q1": "주로 선발되는 아이템은 무엇인가요?"},
+    {"Q3": "대상 선발시 가점 항목은 무엇이 있나요?"}
   ]
 }

@@ -18,6 +18,11 @@ function QuestionPage() {
   const [toast, setToast] = useState({ show: false, message: '' });
   const [clickedReQuestions, setClickedReQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
+  const [isNextMailDisabled, setIsNextMailDisabled] = useState({});
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [isAnsweringEnabled, setIsAnsweringEnabled] = useState(true); // 답변 입력 활성/비활성 상태를 관리하는 상태 변수
+
+
 
   //API 연동을 위한 기본 정의
   const baseUrl = "http://localhost:3001";
@@ -85,8 +90,38 @@ function QuestionPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, [params.setId]);
 
+  // 텍스트 입력 여부에 따라 "답변 완료" 버튼의 색상과 활성화 여부를 제어하는 함수
+  const handleAnsweringStatus = (value) => {
+    setIsAnswering(value);
+  };
+
+  // '답변 완료' 버튼의 클래스 이름을 동적으로 결정하는 함수
+  const getButtonClassName = () => {
+    if (isAnswering) {
+      return 'button answer-complete';
+    } else {
+      return 'button answer-complete disabled';
+    }
+  };
+
+
+  // '답변 완료' 버튼 클릭 시
+  const handleSaveAnswer = (questionKey) => {
+    if (isAnswering) {
+      saveAnswer(questionKey);
+      // 답변 저장 후 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
+      updateButtonStatus(questionKey, false);
+      // 답변 저장 후 상태 업데이트
+      setIsAnswering(false);
+      // 답변 입력창 비활성화
+      disableAnswering(questionKey);
+    }
+  };
 
   const handleAnswerChange = (questionType, questionKey, value) => {
+    // 텍스트 입력 여부에 따라 상태 업데이트
+    setIsAnswering(value.trim() !== '');
+
     // 기존 답변 상태 업데이트
     const newAnswers = {
       ...answers,
@@ -103,9 +138,36 @@ function QuestionPage() {
       } else if (questionType === 'newquestionAnswers') {
         setClickedNewQuestions({ ...clickedNewQuestions, [questionKey]: true });
       }
+      // 답변이 입력되면 해당 질문에 대한 답변 입력 활성화 및 '다음에 답하기' 버튼 비활성화
+      updateButtonStatus(questionKey, true);
+    } else {
+      // 텍스트가 비어있을 경우 버튼 비활성화
+      setIsAnswering(false);
+
+      // '재발송 예정' 상태일 때 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
+      if (value === '재발송 예정') {
+        setIsAnswering(false);
+        disableAnswering(questionKey);
+      }
     }
   };
 
+  // '답변 완료' 버튼의 클래스 이름을 동적으로 결정하는 함수 제거
+  // ...
+
+  // 버튼 스타일 정의
+  const buttonStyle = isAnswering
+    ? {
+      backgroundColor: '#5E8BFF',
+      '&:hover': { backgroundColor: '#3255A4' }, // 호버 효과
+      '&:active': { backgroundColor: '#213049' } // 프레스드 효과
+    }
+    : {
+      backgroundColor: '#B1C5F6',
+      cursor: 'default',
+      '&:hover': { backgroundColor: '#B1C5F6' }, // 비활성 상태에서는 호버 효과가 없도록
+      '&:active': { backgroundColor: '#B1C5F6' } // 비활성 상태에서는 프레스드 효과가 없도록
+    };
 
   const showToast = (message) => {
     setToast({ show: true, message });
@@ -158,6 +220,19 @@ function QuestionPage() {
         [questionType]: updatedAnswers
       });
 
+      // '다음에 답하기' 버튼 비활성화 상태 업데이트
+      setIsNextMailDisabled(prevState => ({
+        ...prevState,
+        [questionKey]: true
+      }));
+
+      // '다음에 답하기' 버튼 클릭 시 isAnswering 상태를 false로 설정
+      setIsAnswering(false);
+
+      // '다음에 답하기' 버튼 클릭 시 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
+      updateButtonStatus(questionKey, false);
+
+
       // 성공 토스트 메시지 표시
       showToast('이후 해당 질문을 재발송 하겠습니다.');
     } catch (error) {
@@ -165,6 +240,31 @@ function QuestionPage() {
       // 실패 토스트 메시지 표시
       showToast('재발송 요청에 실패했습니다.');
     }
+  };
+
+  // '다음에 답하기' 버튼 클릭 시 답변 입력창 비활성화 처리 함수
+  const disableAnswering = (questionKey) => {
+    setIsAnsweringEnabled(prevState => ({
+      ...prevState,
+      [questionKey]: false // 특정 질문에 대한 답변 입력 비활성화 상태를 false로 설정
+    }));
+    setIsNextMailDisabled(prevState => ({
+      ...prevState,
+      [questionKey]: true // 해당 질문에 대한 '다음에 답하기' 버튼 비활성화 설정
+    }));
+  };
+
+
+  // '답변 완료' 및 '다음에 답하기' 버튼 클릭 시 버튼 상태 업데이트 함수
+  const updateButtonStatus = (questionKey, isEnabled) => {
+    setIsAnsweringEnabled(prevState => ({
+      ...prevState,
+      [questionKey]: isEnabled // 특정 질문에 대한 답변 입력 상태를 설정
+    }));
+    setIsNextMailDisabled(prevState => ({
+      ...prevState,
+      [questionKey]: !isEnabled // 해당 질문에 대한 '다음에 답하기' 버튼 활성/비활성 상태 업데이트
+    }));
   };
 
 
@@ -366,9 +466,36 @@ function QuestionPage() {
                       onChange={(e) => handleAnswerChange('requestionAnswers', questionKey, e.target.value)}
                       onInput={autoResizeTextarea}
                       className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'requestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                      placeholder="답변을 입력해주세요."
+                      disabled={!isAnsweringEnabled} // 답변 입력 비활성 상태일 때 textarea 비활성화
+                    ></textarea>
+                    <div
+                      onClick={() => {
+                        submitResendRequest(questionKey, 'requestionAnswers');
+                        disableAnswering(questionKey); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
+                        setIsNextMailDisabled(prevState => ({
+                          ...prevState,
+                          [questionKey]: true // '다음에 답하기' 버튼 비활성화
+                        }));
+                      }}
+                      className={`button next-mail ${isNextMailDisabled[questionKey] ? 'disabled' : ''}`}
+                      disabled={isNextMailDisabled[questionKey] || !isAnsweringEnabled} // 답변 입력 비활성 상태일 때 버튼 비활성화
+                    >
+                      다음에 답하기
+                    </div>
+                    <div
+                      onClick={() => {
+                        handleSaveAnswer(questionKey);
+                        disableAnswering(questionKey); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
+                        setIsNextMailDisabled(prevState => ({
+                          ...prevState,
+                          [questionKey]: true // '다음에 답하기' 버튼 비활성화
+                        }));
+                      }}
+                      className={`button answer-complete ${isAnswering ? 'active' : 'disabled'}`}
+                    >
+                      답변 완료
+                    </div>
                   </div>
                 </div>
               </div>
@@ -377,6 +504,7 @@ function QuestionPage() {
         </div>
 
         <hr />
+
         <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
           {toast.message}
         </div>
@@ -437,9 +565,29 @@ function QuestionPage() {
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
                       onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
                       className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                      placeholder="답변을 입력해주세요."
+                      disabled={!isAnsweringEnabled} // 답변 입력 비활성 상태일 때 textarea 비활성화
+                    >
+                    </textarea>
+                    <div
+                      onClick={() => {
+                        submitResendRequest(questionKey, 'newquestionAnswers')
+                        disableAnswering(); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
+                      }}
+                      className={`button next-mail ${isNextMailDisabled[questionKey] ? 'disabled' : ''}`}
+                      disabled={isNextMailDisabled[questionKey] || !isAnsweringEnabled}
+                    >
+                      다음에 답하기
+                    </div>
+                    <div
+                      onClick={() => {
+                        handleSaveAnswer(questionKey)
+                        disableAnswering(); // '답변 완료' 클릭 시 답변 입력 비활성화 처리
+                      }}
+                      className={`button answer-complete ${isAnswering ? 'active' : 'disabled'}`}
+                    >
+                      답변 완료
+                    </div>
                   </div>
                 </div>
               </div>

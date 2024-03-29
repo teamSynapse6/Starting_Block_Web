@@ -5,6 +5,7 @@ import './QuestionPageStyles.css';
 import './Constants/Font_style.css';
 
 
+
 function QuestionPage() {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
@@ -18,10 +19,8 @@ function QuestionPage() {
   const [toast, setToast] = useState({ show: false, message: '' });
   const [clickedReQuestions, setClickedReQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
-  const [isNextMailDisabled, setIsNextMailDisabled] = useState({});
-  const [isAnswering, setIsAnswering] = useState(false);
-  const [isAnsweringEnabled, setIsAnsweringEnabled] = useState(true); // 답변 입력 활성/비활성 상태를 관리하는 상태 변수
-
+  const [answeredReQuestions, setAnsweredReQuestions] = useState({});
+  const [answeredNewQuestions, setAnsweredNewQuestions] = useState({});
 
 
   //API 연동을 위한 기본 정의
@@ -90,38 +89,8 @@ function QuestionPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, [params.setId]);
 
-  // 텍스트 입력 여부에 따라 "답변 완료" 버튼의 색상과 활성화 여부를 제어하는 함수
-  const handleAnsweringStatus = (value) => {
-    setIsAnswering(value);
-  };
-
-  // '답변 완료' 버튼의 클래스 이름을 동적으로 결정하는 함수
-  const getButtonClassName = () => {
-    if (isAnswering) {
-      return 'button answer-complete';
-    } else {
-      return 'button answer-complete disabled';
-    }
-  };
-
-
-  // '답변 완료' 버튼 클릭 시
-  const handleSaveAnswer = (questionKey) => {
-    if (isAnswering) {
-      saveAnswer(questionKey);
-      // 답변 저장 후 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
-      updateButtonStatus(questionKey, false);
-      // 답변 저장 후 상태 업데이트
-      setIsAnswering(false);
-      // 답변 입력창 비활성화
-      disableAnswering(questionKey);
-    }
-  };
 
   const handleAnswerChange = (questionType, questionKey, value) => {
-    // 텍스트 입력 여부에 따라 상태 업데이트
-    setIsAnswering(value.trim() !== '');
-
     // 기존 답변 상태 업데이트
     const newAnswers = {
       ...answers,
@@ -138,36 +107,9 @@ function QuestionPage() {
       } else if (questionType === 'newquestionAnswers') {
         setClickedNewQuestions({ ...clickedNewQuestions, [questionKey]: true });
       }
-      // 답변이 입력되면 해당 질문에 대한 답변 입력 활성화 및 '다음에 답하기' 버튼 비활성화
-      updateButtonStatus(questionKey, true);
-    } else {
-      // 텍스트가 비어있을 경우 버튼 비활성화
-      setIsAnswering(false);
-
-      // '재발송 예정' 상태일 때 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
-      if (value === '재발송 예정') {
-        setIsAnswering(false);
-        disableAnswering(questionKey);
-      }
     }
   };
 
-  // '답변 완료' 버튼의 클래스 이름을 동적으로 결정하는 함수 제거
-  // ...
-
-  // 버튼 스타일 정의
-  const buttonStyle = isAnswering
-    ? {
-      backgroundColor: '#5E8BFF',
-      '&:hover': { backgroundColor: '#3255A4' }, // 호버 효과
-      '&:active': { backgroundColor: '#213049' } // 프레스드 효과
-    }
-    : {
-      backgroundColor: '#B1C5F6',
-      cursor: 'default',
-      '&:hover': { backgroundColor: '#B1C5F6' }, // 비활성 상태에서는 호버 효과가 없도록
-      '&:active': { backgroundColor: '#B1C5F6' } // 비활성 상태에서는 프레스드 효과가 없도록
-    };
 
   const showToast = (message) => {
     setToast({ show: true, message });
@@ -177,94 +119,58 @@ function QuestionPage() {
   };
 
 
-  const saveAnswer = (questionKey) => {
-    // questionKey를 기반으로 질문 유형을 결정합니다.
-    const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'newquestionAnswers';
+  const saveAnswer = (questionKey, questionType) => {
     const answer = answers[questionType][questionKey]?.trim();
 
     if (!answer) {
-      showToast('답변을 입력해주세요.'); // 답변이 비어 있을 경우 메시지를 표시합니다.
+      showToast('답변을 입력해주세요.');
     } else {
-      // 답변을 게시합니다.
-      axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: answers.requestionAnswers,
-        newquestionAnswers: answers.newquestionAnswers
-      })
+      axios
+        .post(`${baseUrl}/submit/${params.setId}`, {
+          requestionAnswers: answers.requestionAnswers,
+          newquestionAnswers: answers.newquestionAnswers,
+        })
         .then(() => {
-          showToast('답변이 저장되었습니다.'); // 성공 메시지를 표시합니다.
+          showToast('답변이 저장되었습니다.');
+          if (questionType === 'requestionAnswers') {
+            setAnsweredReQuestions((prev) => ({ ...prev, [questionKey]: true }));
+          } else {
+            setAnsweredNewQuestions((prev) => ({ ...prev, [questionKey]: true }));
+          }
         })
         .catch((error) => {
           console.error('답변 저장에 실패했습니다', error);
-          showToast('답변 저장에 실패했습니다.'); // 에러 메시지를 표시합니다.
+          showToast('답변 저장에 실패했습니다.');
         });
     }
   };
-
   const submitResendRequest = async (questionKey, questionType) => {
     try {
-      // 질문 유형에 따라 적절한 답변 상태를 업데이트
       const updatedAnswers = {
         ...answers[questionType],
-        [questionKey]: '재발송 예정'
+        [questionKey]: '재발송 예정',
       };
 
-      // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
       const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
         requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
+        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers,
       });
 
-      // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
       setAnswers({
         ...answers,
-        [questionType]: updatedAnswers
+        [questionType]: updatedAnswers,
       });
 
-      // '다음에 답하기' 버튼 비활성화 상태 업데이트
-      setIsNextMailDisabled(prevState => ({
-        ...prevState,
-        [questionKey]: true
-      }));
-
-      // '다음에 답하기' 버튼 클릭 시 isAnswering 상태를 false로 설정
-      setIsAnswering(false);
-
-      // '다음에 답하기' 버튼 클릭 시 해당 질문에 대한 답변 입력 비활성화 및 '다음에 답하기' 버튼 활성화
-      updateButtonStatus(questionKey, false);
-
-
-      // 성공 토스트 메시지 표시
       showToast('이후 해당 질문을 재발송 하겠습니다.');
+      if (questionType === 'requestionAnswers') {
+        setAnsweredReQuestions((prev) => ({ ...prev, [questionKey]: true }));
+      } else {
+        setAnsweredNewQuestions((prev) => ({ ...prev, [questionKey]: true }));
+      }
     } catch (error) {
       console.error('재발송 요청에 실패했습니다.', error);
-      // 실패 토스트 메시지 표시
       showToast('재발송 요청에 실패했습니다.');
     }
-  };
-
-  // '다음에 답하기' 버튼 클릭 시 답변 입력창 비활성화 처리 함수
-  const disableAnswering = (questionKey) => {
-    setIsAnsweringEnabled(prevState => ({
-      ...prevState,
-      [questionKey]: false // 특정 질문에 대한 답변 입력 비활성화 상태를 false로 설정
-    }));
-    setIsNextMailDisabled(prevState => ({
-      ...prevState,
-      [questionKey]: true // 해당 질문에 대한 '다음에 답하기' 버튼 비활성화 설정
-    }));
-  };
-
-
-  // '답변 완료' 및 '다음에 답하기' 버튼 클릭 시 버튼 상태 업데이트 함수
-  const updateButtonStatus = (questionKey, isEnabled) => {
-    setIsAnsweringEnabled(prevState => ({
-      ...prevState,
-      [questionKey]: isEnabled // 특정 질문에 대한 답변 입력 상태를 설정
-    }));
-    setIsNextMailDisabled(prevState => ({
-      ...prevState,
-      [questionKey]: !isEnabled // 해당 질문에 대한 '다음에 답하기' 버튼 활성/비활성 상태 업데이트
-    }));
   };
 
 
@@ -456,43 +362,27 @@ function QuestionPage() {
                       toggleRequestion(questionKey);
                       handleReQuestionClick(questionKey);
                     }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                    <div className={`item answer-item ${hasAnswer ? 'answeredReQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
                       <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
                     </div>
                   </div>
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
+                      disabled={answeredReQuestions[questionKey]}
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
                       onChange={(e) => handleAnswerChange('requestionAnswers', questionKey, e.target.value)}
                       onInput={autoResizeTextarea}
                       className="answer-textarea"
-                      placeholder="답변을 입력해주세요."
-                      disabled={!isAnsweringEnabled} // 답변 입력 비활성 상태일 때 textarea 비활성화
-                    ></textarea>
+                      placeholder="답변을 입력해주세요."></textarea>
                     <div
-                      onClick={() => {
-                        submitResendRequest(questionKey, 'requestionAnswers');
-                        disableAnswering(questionKey); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
-                        setIsNextMailDisabled(prevState => ({
-                          ...prevState,
-                          [questionKey]: true // '다음에 답하기' 버튼 비활성화
-                        }));
-                      }}
-                      className={`button next-mail ${isNextMailDisabled[questionKey] ? 'disabled' : ''}`}
-                      disabled={isNextMailDisabled[questionKey] || !isAnsweringEnabled} // 답변 입력 비활성 상태일 때 버튼 비활성화
+                      onClick={() => !answeredReQuestions[questionKey] && submitResendRequest(questionKey, 'requestionAnswers')}
+                      className={`button next-mail ${answeredReQuestions[questionKey] ? 'disabled' : ''}`}
                     >
                       다음에 답하기
                     </div>
                     <div
-                      onClick={() => {
-                        handleSaveAnswer(questionKey);
-                        disableAnswering(questionKey); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
-                        setIsNextMailDisabled(prevState => ({
-                          ...prevState,
-                          [questionKey]: true // '다음에 답하기' 버튼 비활성화
-                        }));
-                      }}
-                      className={`button answer-complete ${isAnswering ? 'active' : 'disabled'}`}
+                      onClick={() => !answeredReQuestions[questionKey] && currentAnswer.trim() && saveAnswer(questionKey, 'requestionAnswers')}
+                      className={`button answer-complete ${answeredReQuestions[questionKey] || !currentAnswer.trim() ? 'disabled' : ''}`}
                     >
                       답변 완료
                     </div>
@@ -504,7 +394,6 @@ function QuestionPage() {
         </div>
 
         <hr />
-
         <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
           {toast.message}
         </div>
@@ -556,35 +445,26 @@ function QuestionPage() {
                       toggleNewQuestion(questionKey)
                       handleNewQuestionClick(questionKey);
                     }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                    <div className={`item answer-item ${hasAnswer ? 'answeredNewQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
                       <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
                     </div>
                   </div>
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
+                      disabled={answeredNewQuestions[questionKey]}
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
                       onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
                       className="answer-textarea"
-                      placeholder="답변을 입력해주세요."
-                      disabled={!isAnsweringEnabled} // 답변 입력 비활성 상태일 때 textarea 비활성화
-                    >
-                    </textarea>
+                      placeholder="답변을 입력해주세요."></textarea>
                     <div
-                      onClick={() => {
-                        submitResendRequest(questionKey, 'newquestionAnswers')
-                        disableAnswering(); // '다음에 답하기' 클릭 시 답변 입력 비활성화 처리
-                      }}
-                      className={`button next-mail ${isNextMailDisabled[questionKey] ? 'disabled' : ''}`}
-                      disabled={isNextMailDisabled[questionKey] || !isAnsweringEnabled}
+                      onClick={() => !answeredNewQuestions[questionKey] && submitResendRequest(questionKey, 'newquestionAnswers')}
+                      className={`button next-mail ${answeredNewQuestions[questionKey] ? 'disabled' : ''}`}
                     >
                       다음에 답하기
                     </div>
                     <div
-                      onClick={() => {
-                        handleSaveAnswer(questionKey)
-                        disableAnswering(); // '답변 완료' 클릭 시 답변 입력 비활성화 처리
-                      }}
-                      className={`button answer-complete ${isAnswering ? 'active' : 'disabled'}`}
+                      onClick={() => !answeredNewQuestions[questionKey] && currentAnswer.trim() && saveAnswer(questionKey, 'newquestionAnswers')}
+                      className={`button answer-complete ${answeredNewQuestions[questionKey] || !currentAnswer.trim() ? 'disabled' : ''}`}
                     >
                       답변 완료
                     </div>

@@ -372,6 +372,13 @@ body {
   /* 부드러운 전환 효과를 위해 추가 */
 }
 
+.done-button:disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
 .done-button:hover {
   border: 0;
   background-color: #3255A4;

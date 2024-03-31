@@ -152,9 +152,9 @@ function QuestionPage() {
         [questionKey]: '재발송 예정',
       };
 
-      const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers,
+      await axios.post(`${baseUrl}/submit/${params.setId}`, {
+        requestionAnswers: answers.requestionAnswers,
+        newquestionAnswers: answers.newquestionAnswers,
       });
 
       setAnswers({
@@ -286,7 +286,7 @@ function QuestionPage() {
     <>
       <div className="header">
         <div className="header-container">
-          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}> 
             <img src="/images/logo.png" alt="Logo" className="logo" />
             <span className="title">스타팅블록</span>
           </a>

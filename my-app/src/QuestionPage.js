@@ -19,11 +19,15 @@ function QuestionPage() {
   const [toast, setToast] = useState({ show: false, message: '' });
   const [clickedReQuestions, setClickedReQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
+  const [answeredReQuestions, setAnsweredReQuestions] = useState({});
+  const [answeredNewQuestions, setAnsweredNewQuestions] = useState({});
+  const [isAllAnswersSubmitted, setIsAllAnswersSubmitted] = useState(false);
+
 
   //API 연동을 위한 기본 정의
- const baseUrl = "http://localhost:3001";
+  const baseUrl = "http://localhost:3001";
 
-  
+
   // 재발송 질문 클릭 처리 함수
   const handleReQuestionClick = (questionKey) => {
     setClickedReQuestions({
@@ -61,18 +65,18 @@ function QuestionPage() {
   useEffect(() => { //사이트 접속 시 데이터 초기 데이터 불러오는 메소드
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
-  
+
     const loadQuestions = async () => {
       try {
         const response = await axios.get(`${baseUrl}/questions/${params.setId}`);
         const data = response.data;
         setTitle(data.title);
         setAddress(data.address);
-  
+
         // 변경된 데이터 구조에 따라 질문과 답변을 처리
         const { requestions, newquestions } = data.questions;
         const loadedAnswers = data.answers;
-  
+
         setRequestions(Object.entries(requestions).map(([key, value]) => ({ [key]: value })));
         setNewQuestions(Object.entries(newquestions).map(([key, value]) => ({ [key]: value })));
         setAnswers(loadedAnswers);
@@ -80,12 +84,12 @@ function QuestionPage() {
         console.error('질문을 불러오는데 실패했습니다.', error);
       }
     };
-  
+
     loadQuestions();
-  
+
     return () => window.removeEventListener('resize', handleResize);
   }, [params.setId]);
-  
+
 
   const handleAnswerChange = (questionType, questionKey, value) => {
     // 기존 답변 상태 업데이트
@@ -116,54 +120,56 @@ function QuestionPage() {
   };
 
 
-  const saveAnswer = (questionKey) => {
-    // questionKey를 기반으로 질문 유형을 결정합니다.
-    const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'newquestionAnswers';
+  const saveAnswer = (questionKey, questionType) => {
     const answer = answers[questionType][questionKey]?.trim();
 
     if (!answer) {
-      showToast('답변을 입력해주세요.'); // 답변이 비어 있을 경우 메시지를 표시합니다.
+      showToast('답변을 입력해주세요.');
     } else {
-      // 답변을 게시합니다.
-      axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: answers.requestionAnswers,
-        newquestionAnswers: answers.newquestionAnswers
-      })
+      axios
+        .post(`${baseUrl}/submit/${params.setId}`, {
+          requestionAnswers: answers.requestionAnswers,
+          newquestionAnswers: answers.newquestionAnswers,
+        })
         .then(() => {
-          showToast('답변이 저장되었습니다.'); // 성공 메시지를 표시합니다.
+          showToast('답변이 저장되었습니다.');
+          if (questionType === 'requestionAnswers') {
+            setAnsweredReQuestions((prev) => ({ ...prev, [questionKey]: true }));
+          } else {
+            setAnsweredNewQuestions((prev) => ({ ...prev, [questionKey]: true }));
+          }
         })
         .catch((error) => {
           console.error('답변 저장에 실패했습니다', error);
-          showToast('답변 저장에 실패했습니다.'); // 에러 메시지를 표시합니다.
+          showToast('답변 저장에 실패했습니다.');
         });
     }
   };
-
   const submitResendRequest = async (questionKey, questionType) => {
     try {
-      // 질문 유형에 따라 적절한 답변 상태를 업데이트
       const updatedAnswers = {
         ...answers[questionType],
-        [questionKey]: '재발송 예정'
+        [questionKey]: '재발송 예정',
       };
 
-      // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
-      const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-        newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
+      await axios.post(`${baseUrl}/submit/${params.setId}`, {
+        requestionAnswers: answers.requestionAnswers,
+        newquestionAnswers: answers.newquestionAnswers,
       });
 
-      // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
       setAnswers({
         ...answers,
-        [questionType]: updatedAnswers
+        [questionType]: updatedAnswers,
       });
 
-      // 성공 토스트 메시지 표시
       showToast('이후 해당 질문을 재발송 하겠습니다.');
+      if (questionType === 'requestionAnswers') {
+        setAnsweredReQuestions((prev) => ({ ...prev, [questionKey]: true }));
+      } else {
+        setAnsweredNewQuestions((prev) => ({ ...prev, [questionKey]: true }));
+      }
     } catch (error) {
       console.error('재발송 요청에 실패했습니다.', error);
-      // 실패 토스트 메시지 표시
       showToast('재발송 요청에 실패했습니다.');
     }
   };
@@ -253,6 +259,7 @@ function QuestionPage() {
           newquestionAnswers: sortedNewAnswers
         });
         alert(`답변이 제출되었습니다. \n답변이 없는 ${totalUnansweredQuestions}개의 질문은 다음날 재발송드립니다.`);
+        setIsAllAnswersSubmitted(true); // "모든 답변 완료" 버튼이 클릭되었음을 표시
       } catch (error) {
         console.error('답변 제출에 실패했습니다.', error);
       }
@@ -261,6 +268,7 @@ function QuestionPage() {
         // 모든 답변이 완료되었을 경우 답변 저장
         await axios.post(`${baseUrl}/submit/${params.setId}`, answers);
         alert('답변이 제출되었습니다.');
+        setIsAllAnswersSubmitted(true); // "모든 답변 완료" 버튼이 클릭되었음을 표시
       } catch (error) {
         console.error('답변 제출에 실패했습니다.', error);
       }
@@ -278,7 +286,7 @@ function QuestionPage() {
     <>
       <div className="header">
         <div className="header-container">
-          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}> 
             <img src="/images/logo.png" alt="Logo" className="logo" />
             <span className="title">스타팅블록</span>
           </a>
@@ -357,19 +365,30 @@ function QuestionPage() {
                       toggleRequestion(questionKey);
                       handleReQuestionClick(questionKey);
                     }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                    <div className={`item answer-item ${hasAnswer ? 'answeredReQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
                       <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
                     </div>
                   </div>
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
+                      disabled={answeredReQuestions[questionKey] || isAllAnswersSubmitted}
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
                       onChange={(e) => handleAnswerChange('requestionAnswers', questionKey, e.target.value)}
                       onInput={autoResizeTextarea}
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'requestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                    <div
+                      onClick={() => !answeredReQuestions[questionKey] && !isAllAnswersSubmitted && submitResendRequest(questionKey, 'requestionAnswers')}
+                      className={`button next-mail ${(answeredReQuestions[questionKey] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      다음에 답하기
+                    </div>
+                    <div
+                      onClick={() => !answeredReQuestions[questionKey] && !isAllAnswersSubmitted && currentAnswer.trim() && saveAnswer(questionKey, 'requestionAnswers')}
+                      className={`button answer-complete ${(answeredReQuestions[questionKey] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      답변 완료
+                    </div>
                   </div>
                 </div>
               </div>
@@ -429,18 +448,29 @@ function QuestionPage() {
                       toggleNewQuestion(questionKey)
                       handleNewQuestionClick(questionKey);
                     }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                    <div className={`item answer-item ${hasAnswer ? 'answeredNewQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
                       <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
                     </div>
                   </div>
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
+                      disabled={answeredNewQuestions[questionKey] || isAllAnswersSubmitted}
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
                       onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className="button answer-complete">답변 완료</div>
+                    <div
+                      onClick={() => !answeredNewQuestions[questionKey] && !isAllAnswersSubmitted && submitResendRequest(questionKey, 'newquestionAnswers')}
+                      className={`button next-mail ${(answeredNewQuestions[questionKey] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      다음에 답하기
+                    </div>
+                    <div
+                      onClick={() => !answeredNewQuestions[questionKey] && !isAllAnswersSubmitted && currentAnswer.trim() && saveAnswer(questionKey, 'newquestionAnswers')}
+                      className={`button answer-complete ${(answeredNewQuestions[questionKey] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      답변 완료
+                    </div>
                   </div>
                 </div>
               </div>
@@ -454,7 +484,9 @@ function QuestionPage() {
           <div className="done-text1">소중한 답변 감사합니다</div>
           <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
           <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          <button onClick={saveAllAnswers} className="done-button">모든 답변 완료</button>
+          <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
+            모든 답변 완료
+          </button>
         </div>
       </div>
 

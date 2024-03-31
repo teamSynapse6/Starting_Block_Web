@@ -38,6 +38,7 @@ def save_answers(setId, answers):
     filename = f'answers_{setId}.json'
     file_path = os.path.join(BASE_DIR, 'answers', filename)
     try:
+        print(f'{json.dumps(answers, ensure_ascii=False, indent=2)}')
         # ensure_ascii=False로 설정하여 파일 저장 시 아스키 코드 변환을 방지
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(answers, file, ensure_ascii=False, indent=2)

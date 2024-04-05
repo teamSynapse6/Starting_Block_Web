@@ -26,42 +26,58 @@ def get_questions_answer(setId):
 # 개별 답변을 저장하는 메소드
 @app.route('/api/v1/web/answer', methods=['POST'])
 def submit_answer():
-    # POST 요청에서 JSON 데이터 추출
     data = request.json
     questionId = data.get('questionId')
     content = data.get('content')
 
-    # setId를 추출합니다. 여기서는 예시로 questionId를 setId로 사용합니다.
-    # 실제 사용 시에는 setId를 어떻게 결정할지에 따라 다를 수 있습니다.
-    setId = str(questionId)  # setId 정의 방식에 따라 수정 필요
+    # 답변 파일 경로 정의, questionId를 파일명으로 사용
+    answers_file_path = os.path.join(BASE_DIR, 'answers', f'{questionId}.json')
 
-    answers_file_path = os.path.join(BASE_DIR, 'answers', f'{setId}.json')
-
-    # 이미 파일이 존재하는 경우, 수정을 방지
+    # 파일이 이미 존재하는 경우, 중복 저장 방지
     if os.path.exists(answers_file_path):
-        try:
-            with open(answers_file_path, 'r', encoding='utf-8') as file:
-                existing_answers = json.load(file)
-            
-            # 이미 해당 questionId에 대한 답변이 있는지 확인
-            if str(questionId) in existing_answers:
-                return '이미 답변이 저장되었습니다.', 500
-            else:
-                # 새로운 답변을 추가합니다. (현재 요구 사항과는 다를 수 있음)
-                existing_answers[str(questionId)] = content
+        return '이미 답변이 저장되었습니다.', 500
+
+    # 새 답변 파일 생성
+    try:
+        # 파일 생성 및 questionId와 content 저장
+        with open(answers_file_path, 'w', encoding='utf-8') as file:
+            # questionId와 content를 모두 포함하는 데이터를 저장
+            json.dump(data, file, ensure_ascii=False, indent=2)
+        return '답변이 저장되었습니다.', 201
+    except Exception as e:
+        return f'답변 저장 중 오류가 발생했습니다: {e}', 500
+
+
+        
+
+# 모든 답변을 저장하는 메소드
+@app.route('/api/v1/web/answer/all', methods=['POST'])
+def submit_all_answers():
+    data = request.json
+    questions = data.get('questions')
+
+    # 모든 답변을 저장하기 위한 로직
+    for question in questions:
+        questionId = question.get('questionId')
+        content = question.get('content')
+
+        # 답변 파일 경로 정의
+        answers_file_path = os.path.join(BASE_DIR, 'answers', f'{questionId}.json')
+
+        # 이미 답변 파일이 존재하는 경우, 중복 저장 방지
+        if os.path.exists(answers_file_path):
+            continue  # 이미 존재하는 답변은 건너뛰고 다음 답변 처리
+        else:
+            # 새 답변 파일 생성
+            try:
                 with open(answers_file_path, 'w', encoding='utf-8') as file:
-                    json.dump(existing_answers, file, ensure_ascii=False, indent=2)
-                return '답변이 추가되었습니다.', 201
-        except Exception as e:
-            return f'답변 저장 중 오류가 발생했습니다: {e}', 500
-    else:
-        # 답변 파일이 존재하지 않는 경우, 새 파일 생성
-        try:
-            with open(answers_file_path, 'w', encoding='utf-8') as file:
-                json.dump({str(questionId): content}, file, ensure_ascii=False, indent=2)
-            return '답변이 저장되었습니다.', 201
-        except Exception as e:
-            return f'답변 저장 중 오류가 발생했습니다: {e}', 500
+                    json.dump({"questionId": questionId, "content": content}, file, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f'답변 저장 중 오류가 발생했습니다: {e}')
+                return f'답변 저장 중 오류가 발생했습니다: {e}', 500
+
+    return '모든 답변이 저장되었습니다.', 201
+
 
 if __name__ == '__main__':
     app.run(port=3001, debug=True)

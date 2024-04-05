@@ -94,22 +94,39 @@ function QuestionPage() {
   };
 
   // 모든 답변을 저장하는 함수
-  const saveAllAnswers = async (answers) => {
+  const saveAllAnswers = async () => {
+    // 모든 답변을 수집합니다.
+    const allAnswers = [];
+    // oldquestions와 newquestions의 모든 질문에 대해 반복
+    [...oldquestions, ...newquestions].forEach(question => {
+      const questionId = question.questionId;
+      const answerContent = answers.oldquestionAnswers[questionId] || answers.newquestionAnswers[questionId] || '';
+
+      // 답변이 비어있지 않다면 allAnswers 배열에 추가
+      if (answerContent.trim() !== '') {
+        allAnswers.push({
+          questionId: questionId,
+          content: answerContent
+        });
+      }
+    });
+    // 모든 답변이 수집되었다면 API 호출을 수행합니다.
     try {
       const response = await axios.post(`${baseUrl}/api/v1/web/answer/all`, {
-        questions: answers
+        questions: allAnswers
       });
       if (response.status === 201) {
-        // 추가로 필요한 로직이 있다면 여기에 작성
+        showToast('모든 답변이 성공적으로 제출되었습니다.');
+        setIsAllAnswersSubmitted(true); // 모든 답변 제출 완료 상태 업데이트
       } else {
-        // 예상치 못한 응답 코드를 받았을 때의 처리
-        showToast('답변 저장 중 예상치 못한 오류가 발생했습니다.');
+        showToast('답변 제출 중 예상치 못한 오류가 발생했습니다.');
       }
     } catch (error) {
-      console.error('답변 저장에 실패했습니다:', error);
-      showToast('답변 저장에 실패했습니다.');
+      console.error('답변 제출에 실패했습니다:', error);
+      showToast('답변 제출에 실패했습니다.');
     }
   };
+
 
 
   /* 토클 처리 부분 */
@@ -383,9 +400,9 @@ function QuestionPage() {
           <div className="done-text1">소중한 답변 감사합니다</div>
           <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
           <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          {/* <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
+          <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
             모든 답변 완료
-          </button> */}
+          </button>
         </div>
       </div>
 

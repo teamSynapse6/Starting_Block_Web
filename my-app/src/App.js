@@ -6,7 +6,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/questions/:setId" element={<QuestionPage />} />
+        <Route path="/api/v1/web/question/:announcementId" element={<QuestionPage />} />
       </Routes>
     </Router>
   );

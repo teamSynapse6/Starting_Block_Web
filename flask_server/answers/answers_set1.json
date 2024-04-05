@@ -1,11 +1,7 @@
 {
   "requestionAnswers": {
-    "Q1": "재발송 예정",
-    "Q2": "재전송 2답변",
-    "Q3": "재전송 3답변"
+    "Q1": "ㅁㅇㅁㄴㅇㅁㄴ",
+    "Q2": "답변입니다"
   },
-  "newquestionAnswers": {
-    "Q1": "신규질문1 답변",
-    "Q2": "신규2 답변"
-  }
+  "newquestionAnswers": {}
 }

@@ -25,7 +25,7 @@ function QuestionPage() {
 
 
   //API 연동을 위한 기본 정의
-  const baseUrl = "http://localhost:3001";
+  const baseUrl = "https://api.startingblock.co.kr";
 
 
   // 재발송 질문 클릭 처리 함수
@@ -62,34 +62,30 @@ function QuestionPage() {
     }
   };
 
-  useEffect(() => { //사이트 접속 시 데이터 초기 데이터 불러오는 메소드
+  useEffect(() => { // 사이트 접속 시 데이터 초기 데이터 불러오는 메소드
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
-
+  
     const loadQuestions = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/questions/${params.setId}`);
+        const response = await axios.get(`${baseUrl}/api/v1/web/question/${params.announcementId}`);
         const data = response.data;
-        setTitle(data.title);
-        setAddress(data.address);
-
-        // 변경된 데이터 구조에 따라 질문과 답변을 처리
-        const { requestions, newquestions } = data.questions;
-        const loadedAnswers = data.answers;
-
-        setRequestions(Object.entries(requestions).map(([key, value]) => ({ [key]: value })));
-        setNewQuestions(Object.entries(newquestions).map(([key, value]) => ({ [key]: value })));
-        setAnswers(loadedAnswers);
+        setTitle(data.announcementName);
+        setAddress(data.detailUrl);
+  
+        // 변경된 데이터 구조에 따라 질문을 처리
+        setRequestions(data.oldQuestions); // oldQuestions 데이터 설정
+        setNewQuestions(data.newQuestions); // newQuestions 데이터 설정
       } catch (error) {
         console.error('질문을 불러오는데 실패했습니다.', error);
       }
     };
-
+  
     loadQuestions();
-
+  
     return () => window.removeEventListener('resize', handleResize);
-  }, [params.setId]);
-
+  }, [params.announcementId]); // params.setId를 params.announcementId로 변경
+  
 
   const handleAnswerChange = (questionType, questionKey, value) => {
     // 기존 답변 상태 업데이트
@@ -320,7 +316,7 @@ function QuestionPage() {
 
       <div className="main">
         {/* 재발송 질문 */}
-        <div>
+        <div className='oldQuestion'>
           <h1>재발송 질문</h1>
           <div className="header-container-list">
             <div className="header-textbox-question">질문</div>
@@ -402,8 +398,8 @@ function QuestionPage() {
         </div>
 
 
-        {/* 신규 질문 */}
-        <div>
+
+        <div className='newQuestion'>
           <h1>신규 질문</h1>
           <div className="header-container-list">
             <div className="header-textbox-question">질문</div>

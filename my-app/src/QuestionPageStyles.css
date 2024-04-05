@@ -372,6 +372,13 @@ body {
   /* 부드러운 전환 효과를 위해 추가 */
 }
 
+.done-button:disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
 .done-button:hover {
   border: 0;
   background-color: #3255A4;
@@ -782,11 +789,14 @@ body {
   }
 
   /* 비활성화된 버튼에 대한 스타일 */
-.button.disabled {
-  color: #999; /* 비활성화된 텍스트 색상 */
-  background-color: #ccc; /* 비활성화된 배경색 */
-  cursor: not-allowed; /* 비활성화된 상태에서 포인터 변경 */
-}
+  .button.disabled {
+    color: #999;
+    /* 비활성화된 텍스트 색상 */
+    background-color: #ccc;
+    /* 비활성화된 배경색 */
+    cursor: not-allowed;
+    /* 비활성화된 상태에서 포인터 변경 */
+  }
 
 
   .main {
@@ -1168,14 +1178,20 @@ h1 {
 
 /* '답변 완료' 버튼 호버 시 스타일 */
 .button.answer-complete:hover {
-  background-color: #3255A4;
+  background-color: #3255A4 !important;
   /* 호버시 배경색 */
 }
 
 /* '답변 완료' 버튼 클릭 시 스타일 */
 .button.answer-complete:active {
-  background-color: #213049;
+  background-color: #213049 !important;
   /* 클릭시 배경색 */
+}
+
+.disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 

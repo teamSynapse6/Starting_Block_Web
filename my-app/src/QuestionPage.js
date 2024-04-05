@@ -9,25 +9,114 @@ import './Constants/Font_style.css';
 function QuestionPage() {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
-  const [requestions, setRequestions] = useState([]);
+  const [oldquestions, setoldquestions] = useState([]);
   const [newquestions, setNewQuestions] = useState([]);
-  const [answers, setAnswers] = useState({ requestionAnswers: {}, newquestionAnswers: {} });
+  const [answers, setAnswers] = useState({ oldquestionAnswers: {}, newquestionAnswers: {} });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const params = useParams();
-  const [expandedRequestion, setExpandedRequestion] = useState(null);
+  const [expandedoldquestion, setExpandedoldquestion] = useState(null);
   const [expandedNewQuestion, setExpandedNewQuestion] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '' });
-  const [clickedReQuestions, setClickedReQuestions] = useState({});
+  const [clickedoldQuestions, setClickedoldQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
+  const [answeredoldQuestions, setAnsweredoldQuestions] = useState({});
+  const [answeredNewQuestions, setAnsweredNewQuestions] = useState({});
+  const [isAllAnswersSubmitted, setIsAllAnswersSubmitted] = useState(false);
+
 
   //API 연동을 위한 기본 정의
- const baseUrl = "http://localhost:3001";
+  // const baseUrl = "https://api.startingblock.co.kr";
+  const baseUrl = "http://127.0.0.1:3001";
 
-  
+
+  useEffect(() => { // 사이트 접속 시 데이터 초기 데이터 불러오는 메소드
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+
+    const loadQuestions = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/api/v1/web/question/${params.announcementId}`);
+        const data = response.data;
+        setTitle(data.announcementName);
+        setAddress(data.detailUrl);
+
+        // 변경된 데이터 구조에 따라 질문을 처리
+        setoldquestions(data.oldQuestions); // oldQuestions 데이터 설정
+        setNewQuestions(data.newQuestions); // newQuestions 데이터 설정
+      } catch (error) {
+        console.error('질문을 불러오는데 실패했습니다.', error);
+      }
+    };
+
+    loadQuestions();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [params.announcementId]); // params.setId를 params.announcementId로 변경
+
+
+
+  // 개별 답변을 저장하는 함수
+  const saveIndividualAnswer = async (questionId, content) => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/v1/web/answer`, {
+        questionId: questionId,
+        content: content
+      });
+      if (response.status === 201) {
+        showToast('답변이 성공적으로 저장되었습니다.');
+        // 추가적으로 필요한 로직이 있다면 여기에 작성
+      } else {
+        // 예상치 못한 응답 코드를 받았을 때의 처리
+        showToast('답변 저장 중 예상치 못한 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('답변 저장에 실패했습니다:', error);
+      showToast('답변 저장에 실패했습니다.');
+    }
+  };
+
+  // 개별 답변을 저장하는 함수
+  const saveToResend = async (questionId) => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/v1/web/answer`, {
+        questionId: questionId,
+        content: null
+      });
+      if (response.status === 201) {
+        showToast('이후 해당 질문을 재발송 하겠습니다.');
+      } else {
+        showToast('재발송 요청에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('재발송 요청에 실패했습니다.', error);
+      showToast('재발송 요청에 실패했습니다');
+    }
+  };
+
+  // 모든 답변을 저장하는 함수
+  const saveAllAnswers = async (answers) => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/v1/web/answer/all`, {
+        questions: answers
+      });
+      if (response.status === 201) {
+        // 추가로 필요한 로직이 있다면 여기에 작성
+      } else {
+        // 예상치 못한 응답 코드를 받았을 때의 처리
+        showToast('답변 저장 중 예상치 못한 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('답변 저장에 실패했습니다:', error);
+      showToast('답변 저장에 실패했습니다.');
+    }
+  };
+
+
+  /* 토클 처리 부분 */
   // 재발송 질문 클릭 처리 함수
-  const handleReQuestionClick = (questionKey) => {
-    setClickedReQuestions({
-      ...clickedReQuestions,
+  const handleoldQuestionClick = (questionKey) => {
+    setClickedoldQuestions({
+      ...clickedoldQuestions,
       [questionKey]: true // 질문이 클릭되면 항상 true로 설정
     });
   };
@@ -41,11 +130,11 @@ function QuestionPage() {
   };
 
   // '재발송 질문' 토글 함수
-  const toggleRequestion = (questionKey) => {
-    if (expandedRequestion === questionKey) {
-      setExpandedRequestion(null);
+  const toggleoldquestion = (questionKey) => {
+    if (expandedoldquestion === questionKey) {
+      setExpandedoldquestion(null);
     } else {
-      setExpandedRequestion(questionKey);
+      setExpandedoldquestion(questionKey);
     }
   };
 
@@ -58,34 +147,18 @@ function QuestionPage() {
     }
   };
 
-  useEffect(() => { //사이트 접속 시 데이터 초기 데이터 불러오는 메소드
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-  
-    const loadQuestions = async () => {
-      try {
-        const response = await axios.get(`${baseUrl}/questions/${params.setId}`);
-        const data = response.data;
-        setTitle(data.title);
-        setAddress(data.address);
-  
-        // 변경된 데이터 구조에 따라 질문과 답변을 처리
-        const { requestions, newquestions } = data.questions;
-        const loadedAnswers = data.answers;
-  
-        setRequestions(Object.entries(requestions).map(([key, value]) => ({ [key]: value })));
-        setNewQuestions(Object.entries(newquestions).map(([key, value]) => ({ [key]: value })));
-        setAnswers(loadedAnswers);
-      } catch (error) {
-        console.error('질문을 불러오는데 실패했습니다.', error);
-      }
-    };
-  
-    loadQuestions();
-  
-    return () => window.removeEventListener('resize', handleResize);
-  }, [params.setId]);
-  
+  const showToast = (message) => {
+    setToast({ show: true, message });
+    setTimeout(() => {
+      setToast({ show: false, message: '' });
+    }, 3000); // 토스트 메시지는 3초 후에 사라집니다.
+  };
+
+
+  function autoResizeTextarea(event) {
+    event.target.style.height = 'auto'; // 높이를 자동으로 설정하여 현재 텍스트 높이에 맞게 조정합니다.
+    event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
+  }
 
   const handleAnswerChange = (questionType, questionKey, value) => {
     // 기존 답변 상태 업데이트
@@ -99,189 +172,13 @@ function QuestionPage() {
 
     // 입력된 텍스트가 있을 경우, 'answered' 상태를 true로 설정
     if (value.trim() !== '') {
-      if (questionType === 'requestionAnswers') {
-        setClickedReQuestions({ ...clickedReQuestions, [questionKey]: true });
+      if (questionType === 'oldquestionAnswers') {
+        setClickedoldQuestions({ ...clickedoldQuestions, [questionKey]: true });
       } else if (questionType === 'newquestionAnswers') {
         setClickedNewQuestions({ ...clickedNewQuestions, [questionKey]: true });
       }
     }
   };
-
-
-  const showToast = (message) => {
-    setToast({ show: true, message });
-    setTimeout(() => {
-      setToast({ show: false, message: '' });
-    }, 3000); // 토스트 메시지는 3초 후에 사라집니다.
-  };
-
-
-  const isAnswered = (questionKey, questionType) => {
-    const answer = answers[questionType][questionKey];
-    return answer && answer.trim() !== ''; // 답변이 작성되었는지 여부를 반환합니다.
-  };
-
-
-  const saveAnswer = (questionKey) => {
-    // questionKey를 기반으로 질문 유형을 결정합니다.
-    const questionType = questionKey in answers.requestionAnswers ? 'requestionAnswers' : 'newquestionAnswers';
-    const answer = answers[questionType][questionKey]?.trim();
-
-    if (!answer) {
-      showToast('답변을 입력해주세요.'); // 답변이 비어 있을 경우 메시지를 표시합니다.
-    } else {
-      // 답변을 게시합니다.
-      axios.post(`${baseUrl}/submit/${params.setId}`, {
-        requestionAnswers: answers.requestionAnswers,
-        newquestionAnswers: answers.newquestionAnswers
-      })
-        .then(() => {
-          showToast('답변이 저장되었습니다.'); // 성공 메시지를 표시합니다.
-        })
-        .catch((error) => {
-          console.error('답변 저장에 실패했습니다', error);
-          showToast('답변 저장에 실패했습니다.'); // 에러 메시지를 표시합니다.
-        });
-    }
-  };
-
-  // '다음에 답하기' 버튼 클릭 시 호출되는 함수
-const submitResendRequest = async (questionKey, questionType) => {
-  try {
-    // 질문 유형에 따라 적절한 답변 상태를 업데이트
-    const updatedAnswers = {
-      ...answers[questionType],
-      [questionKey]: '재발송 예정'
-    };
-
-    // 즉시 업데이트된 답변 상태를 서버에 전송합니다.
-    const response = await axios.post(`${baseUrl}/submit/${params.setId}`, {
-      requestionAnswers: questionType === 'requestionAnswers' ? updatedAnswers : answers.requestionAnswers,
-      newquestionAnswers: questionType === 'newquestionAnswers' ? updatedAnswers : answers.newquestionAnswers
-    });
-
-    // 성공적으로 저장된 후, 전역 상태를 업데이트합니다.
-    setAnswers({
-      ...answers,
-      [questionType]: updatedAnswers
-    });
-
-    // 성공 토스트 메시지 표시
-    showToast('이후 해당 질문을 재발송 하겠습니다.');
-
-    // '답변완료' 버튼을 비활성화하기 위해 답변을 초기화합니다.
-    handleAnswerChange(questionType, questionKey, ''); // 빈 문자열로 답변 초기화
-  } catch (error) {
-    console.error('재발송 요청에 실패했습니다.', error);
-    // 실패 토스트 메시지 표시
-    showToast('재발송 요청에 실패했습니다.');
-  }
-};
-
-
-
-  const saveAllAnswers = async (event) => {
-    // 스크롤 방지 함수(만약 버튼 눌렀을 때 스크롤 되는 오류 발생하면 사용할 것)
-    event.preventDefault();
-
-    // '재발송 예정'으로 표시된 질문의 수를 초기화합니다.
-    let unansweredReQuestionsCount = 0;
-    let unansweredNewQuestionsCount = 0;
-
-    // '재발송 예정'으로 표시된 답변 상태를 검사하고, 이를 카운트합니다.
-    Object.values(answers.requestionAnswers).forEach(answer => {
-      if (answer === '재발송 예정') {
-        unansweredReQuestionsCount++;
-      }
-    });
-
-    Object.values(answers.newquestionAnswers).forEach(answer => {
-      if (answer === '재발송 예정') {
-        unansweredNewQuestionsCount++;
-      }
-    });
-
-    // 답변이 작성되지 않은 질문의 수를 추가합니다.
-    requestions.forEach((question) => {
-      const questionKey = Object.keys(question)[0];
-      if (!answers.requestionAnswers[questionKey]) {
-        unansweredReQuestionsCount++;
-      }
-    });
-
-    newquestions.forEach((question) => {
-      const questionKey = Object.keys(question)[0];
-      if (!answers.newquestionAnswers[questionKey]) {
-        unansweredNewQuestionsCount++;
-      }
-    });
-
-    // 모든 답변이 완료되었는지 확인합니다.
-    const totalUnansweredQuestions = unansweredReQuestionsCount + unansweredNewQuestionsCount;
-
-    if (totalUnansweredQuestions > 0) {
-      // 답변이 없는 질문에 대해 "다음에 답하기"와 동일한 답변으로 설정하여 저장
-      const updatedReAnswers = {};
-      const updatedNewAnswers = {};
-
-      // '재발송 예정'으로 표시된 질문에 대해 답변을 설정합니다.
-      requestions.forEach((question) => {
-        const questionKey = Object.keys(question)[0];
-        if (!answers.requestionAnswers[questionKey]) {
-          updatedReAnswers[questionKey] = '재발송 예정';
-        }
-      });
-
-      newquestions.forEach((question) => {
-        const questionKey = Object.keys(question)[0];
-        if (!answers.newquestionAnswers[questionKey]) {
-          updatedNewAnswers[questionKey] = '재발송 예정';
-        }
-      });
-
-      // 수정된 답변을 기존 답변 상태에 병합
-      const mergedReAnswers = { ...answers.requestionAnswers, ...updatedReAnswers };
-      const mergedNewAnswers = { ...answers.newquestionAnswers, ...updatedNewAnswers };
-
-      // 답변을 질문 순서와 동일한 순서로 저장
-      const sortedReAnswers = {};
-      requestions.forEach((question) => {
-        const questionKey = Object.keys(question)[0];
-        sortedReAnswers[questionKey] = mergedReAnswers[questionKey] || '';
-      });
-
-      const sortedNewAnswers = {};
-      newquestions.forEach((question) => {
-        const questionKey = Object.keys(question)[0];
-        sortedNewAnswers[questionKey] = mergedNewAnswers[questionKey] || '';
-      });
-
-      // 답변 저장
-      try {
-        await axios.post(`${baseUrl}/submit/${params.setId}`, {
-          requestionAnswers: sortedReAnswers,
-          newquestionAnswers: sortedNewAnswers
-        });
-        alert(`답변이 제출되었습니다. \n답변이 없는 ${totalUnansweredQuestions}개의 질문은 다음날 재발송드립니다.`);
-      } catch (error) {
-        console.error('답변 제출에 실패했습니다.', error);
-      }
-    } else {
-      try {
-        // 모든 답변이 완료되었을 경우 답변 저장
-        await axios.post(`${baseUrl}/submit/${params.setId}`, answers);
-        alert('답변이 제출되었습니다.');
-      } catch (error) {
-        console.error('답변 제출에 실패했습니다.', error);
-      }
-    }
-  };
-
-
-  function autoResizeTextarea(event) {
-    event.target.style.height = 'auto'; // 높이를 자동으로 설정하여 현재 텍스트 높이에 맞게 조정합니다.
-    event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
-  }
 
 
   return (
@@ -322,79 +219,93 @@ const submitResendRequest = async (questionKey, questionType) => {
 
       <div className="main">
         {/* 재발송 질문 */}
-        <div>
-          <h1>재발송 질문</h1>
-          <div className="header-container-list">
-            <div className="header-textbox-question">질문</div>
-            <div className="divider-line"></div>
-            <div className="header-textbox-answer">답변</div>
+        {oldquestions.length > 0 && (
+          <div className='oldQuestion'>
+            <h1>재발송 질문</h1>
+            <div className="header-container-list">
+              <div className="header-textbox-question">질문</div>
+              <div className="divider-line"></div>
+              <div className="header-textbox-answer">답변</div>
+            </div>
+            {oldquestions.map((question, index) => {
+              const questionId = question.questionId; // questionKey 대신 questionId를 사용
+              const isExpanded = expandedoldquestion === questionId;
+              const currentAnswer = answers.oldquestionAnswers[questionId] || ''; // 현재 질문에 대한 답변
+              const isClicked = clickedoldQuestions[questionId]; // 이 질문이 클릭되었는지 확인
+              const hasAnswer = !!answers.oldquestionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
+              return (
+                <div key={index} className="container">
+                  <div className="question-container">
+                    <div
+                      className={`list question-list ${isExpanded && 'hide'}`}
+                      onClick={() => {
+                        toggleoldquestion(questionId); // 토글 함수 호출
+                        handleoldQuestionClick(questionId); // 클릭 처리 함수 호출
+                      }}>
+                      <div className={`item question-item ${isClicked ? 'clicked' : ''}`}>
+                        <span className="icon"></span>
+                        <span>{question.content}</span> {/* question[questionKey] 대신 question.content 사용 */}
+                      </div>
+                    </div>
+                    <div
+                      className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
+                      onClick={() => toggleoldquestion(questionId)}>
+                      <span className="detail-icon"></span>
+                      <span>{question.content}</span> {/* 답변 목록에도 동일하게 적용 */}
+                    </div>
+                  </div>
+                  <div className="answer-container">
+                    <div
+                      key={index}
+                      className={`list answer-list ${isExpanded && 'hide'}`}
+                      onClick={() => {
+                        toggleoldquestion(questionId);
+                        handleoldQuestionClick(questionId);
+                      }}>
+                      <div className={`item answer-item ${hasAnswer ? 'answeredoldQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                        <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
+                      </div>
+                    </div>
+                    <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
+                      <textarea
+                        value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
+                        // disabled={answeredoldQuestions[questionId] || isAllAnswersSubmitted}
+                        onChange={(e) => handleAnswerChange('oldquestionAnswers', questionId, e.target.value)}
+                        onInput={autoResizeTextarea}
+                        className="answer-textarea"
+                        placeholder="답변을 입력해주세요."></textarea>
+                      <div
+                        onClick={() => { saveToResend(questionId); }}
+                        className={`button next-mail ${(answeredoldQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      >
+                        다음에 답하기
+                      </div>
+                      <div
+                        onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }}
+                        className={`button answer-complete ${(answeredoldQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      >
+                        답변 완료
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          {requestions.map((question, index) => {
-            const questionKey = Object.keys(question)[0];
-            const isExpanded = expandedRequestion === questionKey;
-            const currentAnswer = answers.requestionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
-            const isClicked = clickedReQuestions[questionKey]; // 이 질문이 클릭되었는지 확인
-            const hasAnswer = !!answers.requestionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
-            return (
-              <div key={index} className="container">
-                <div className="question-container">
-                  <div
-                    className={`list question-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleRequestion(questionKey);
-                      handleReQuestionClick(questionKey);
-                    }}>
-                    <div className={`item question-item ${isClicked ? 'clicked' : ''}`}>
-                      <span className="icon"></span>
-                      <span>{question[questionKey]}</span>
-                    </div>
-                  </div>
-                  <div
-                    className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
-                    onClick={() => toggleRequestion(questionKey)}>
-                    <span className="detail-icon"></span>
-                    <span>{question[questionKey]}</span>
-                    {/* 답변 목록 */}
-                  </div>
-                </div>
-                <div className="answer-container">
-                  <div
-                    key={index}
-                    className={`list answer-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
-                    onClick={() => {
-                      toggleRequestion(questionKey);
-                      handleReQuestionClick(questionKey);
-                    }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
-                      <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
-                    </div>
-                  </div>
-                  <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
-                    <textarea
-                      value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
-                      onChange={(e) => handleAnswerChange('requestionAnswers', questionKey, e.target.value)}
-                      onInput={autoResizeTextarea}
-                      className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'requestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className={`button answer-complete ${!hasAnswer ? 'disabled' : ''}`}>답변 완료</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        )}
 
-        <hr />
-        <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
-          {toast.message}
-        </div>
+        {oldquestions.length > 0 && (
+          <>
+            <hr />
+            <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
+              {toast.message}
+            </div>
+          </>
+        )}
 
 
-        {/* 신규 질문 */}
-        <div>
+
+        <div className='newQuestion'>
           <h1>신규 질문</h1>
           <div className="header-container-list">
             <div className="header-textbox-question">질문</div>
@@ -402,60 +313,68 @@ const submitResendRequest = async (questionKey, questionType) => {
             <div className="header-textbox-answer">답변</div>
           </div>
           {newquestions.map((question, index) => {
-            const questionKey = Object.keys(question)[0];
-            const isExpanded = expandedNewQuestion === questionKey;
-            const currentAnswer = answers.newquestionAnswers[questionKey] || ''; // 현재 질문에 대한 답변
-            const isClicked = clickedNewQuestions[questionKey]; // 클릭 상태 확인
-            const hasAnswer = !!answers.newquestionAnswers[questionKey]; // 이 부분에서 답변 상태를 확인합니다.
+            const questionId = question.questionId;
+            const isExpanded = expandedNewQuestion === questionId;
+            const currentAnswer = answers.newquestionAnswers[questionId] || ''; // 현재 질문에 대한 답변
+            const isClicked = clickedNewQuestions[questionId]; // 클릭 상태 확인
+            const hasAnswer = !!answers.newquestionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
             return (
               <div key={index} className="container">
                 <div className="question-container">
                   <div
                     className={`list question-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
                     onClick={() => {
-                      toggleNewQuestion(questionKey); // 토글 함수 호출
-                      handleNewQuestionClick(questionKey); // 클릭 처리 함수 호출
+                      toggleNewQuestion(questionId); // 토글 함수 호출
+                      handleNewQuestionClick(questionId); // 클릭 처리 함수 호출
                     }}>
                     <div className={`question-item ${isClicked ? 'clicked' : ''}`}>
                       <span className="icon"></span>
-                      <span>{question[questionKey]}</span>
+                      <span>{question.content}</span>
                     </div>
                   </div>
                   <div
                     className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
-                    onClick={() => toggleNewQuestion(questionKey)}>
+                    onClick={() => toggleNewQuestion(questionId)}>
                     <span className="detail-icon"></span>
-                    <span>{question[questionKey]}</span>
-                    {/* 답변 목록 */}
+                    <span>{question.content}</span>
                   </div>
                 </div>
                 <div className="answer-container">
                   <div
                     key={index}
                     className={`list answer-list ${isExpanded && 'hide'}`}
-                    data-pair={question.pairId}
                     onClick={() => {
-                      toggleNewQuestion(questionKey)
-                      handleNewQuestionClick(questionKey);
+                      toggleNewQuestion(questionId)
+                      handleNewQuestionClick(questionId);
                     }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answered' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                    <div className={`item answer-item ${hasAnswer ? 'answeredNewQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
                       <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
                     </div>
                   </div>
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
-                      onChange={(e) => handleAnswerChange('newquestionAnswers', questionKey, e.target.value)}
+                      // disabled={answeredNewQuestions[questionId] || isAllAnswersSubmitted}
+                      onChange={(e) => handleAnswerChange('newquestionAnswers', questionId, e.target.value)}
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
-                    <div onClick={() => submitResendRequest(questionKey, 'newquestionAnswers')} className="button next-mail">다음에 답하기</div>
-                    <div onClick={() => saveAnswer(questionKey)} className={`button answer-complete ${!hasAnswer ? 'disabled' : ''}`}>답변 완료</div>
+                    <div
+                      onClick={() => { saveToResend(questionId); }}
+                      className={`button next-mail ${(answeredNewQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      다음에 답하기
+                    </div>
+                    <div
+                      onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }} className={`button answer-complete ${(answeredNewQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                    >
+                      답변 완료
+                    </div>
                   </div>
                 </div>
               </div>
             );
           })}
+
         </div>
       </div>
 
@@ -464,7 +383,9 @@ const submitResendRequest = async (questionKey, questionType) => {
           <div className="done-text1">소중한 답변 감사합니다</div>
           <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
           <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          <button onClick={saveAllAnswers} className="done-button">모든 답변 완료</button>
+          {/* <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
+            모든 답변 완료
+          </button> */}
         </div>
       </div>
 

@@ -62,7 +62,7 @@ function QuestionPage() {
         questionId: questionId,
         content: content
       });
-      if (response.status === 201) {
+      if (response.status === 201) { 
         showToast('답변이 성공적으로 저장되었습니다.');
         // 추가적으로 필요한 로직이 있다면 여기에 작성
       } else {

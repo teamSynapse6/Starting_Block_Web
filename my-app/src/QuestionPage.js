@@ -7,26 +7,25 @@ import './Constants/Font_style.css';
 
 
 function QuestionPage() {
+  const params = useParams();
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [oldquestions, setoldquestions] = useState([]);
   const [newquestions, setNewQuestions] = useState([]);
-  const [answers, setAnswers] = useState({ oldquestionAnswers: {}, newquestionAnswers: {} });
+  const [questionAnswers, setQuestionAnswers] = useState({});
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const params = useParams();
   const [expandedoldquestion, setExpandedoldquestion] = useState(null);
   const [expandedNewQuestion, setExpandedNewQuestion] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '' });
   const [clickedoldQuestions, setClickedoldQuestions] = useState({});
   const [clickedNewQuestions, setClickedNewQuestions] = useState({});
-  const [answeredoldQuestions, setAnsweredoldQuestions] = useState({});
-  const [answeredNewQuestions, setAnsweredNewQuestions] = useState({});
+  const [answeredQuestions, setAnsweredQuestions] = useState({});
   const [isAllAnswersSubmitted, setIsAllAnswersSubmitted] = useState(false);
 
 
   //API 연동을 위한 기본 정의
-  // const baseUrl = "https://api.startingblock.co.kr";
-  const baseUrl = "http://127.0.0.1:3001";
+  const baseUrl = "https://api.startingblock.co.kr";
+  // const baseUrl = "http://127.0.0.1:3001";
 
 
   useEffect(() => { // 사이트 접속 시 데이터 초기 데이터 불러오는 메소드
@@ -62,9 +61,9 @@ function QuestionPage() {
         questionId: questionId,
         content: content
       });
-      if (response.status === 201) { 
-        showToast('답변이 성공적으로 저장되었습니다.');
-        // 추가적으로 필요한 로직이 있다면 여기에 작성
+      if (response.status === 201) {
+        showToast('답변이 저장되었습니다.');
+        setAnsweredQuestions(prev => ({ ...prev, [questionId]: true }));
       } else {
         // 예상치 못한 응답 코드를 받았을 때의 처리
         showToast('답변 저장 중 예상치 못한 오류가 발생했습니다.');
@@ -84,6 +83,8 @@ function QuestionPage() {
       });
       if (response.status === 201) {
         showToast('이후 해당 질문을 재발송 하겠습니다.');
+        setAnsweredQuestions(prev => ({ ...prev, [questionId]: true }));
+        setQuestionAnswers(prev => ({ ...prev, [questionId]: '재발송 예정' }));
       } else {
         showToast('재발송 요청에 실패했습니다.');
       }
@@ -94,13 +95,17 @@ function QuestionPage() {
   };
 
   // 모든 답변을 저장하는 함수
-  const saveAllAnswers = async () => {
+  const saveAllAnswers = async (event) => {
+    event.preventDefault(); //스크롤 방지를 위한 기본 이벤트 방지
+
+    let notAnswered = [];
+
     // 모든 답변을 수집합니다.
     const allAnswers = [];
     // oldquestions와 newquestions의 모든 질문에 대해 반복
     [...oldquestions, ...newquestions].forEach(question => {
       const questionId = question.questionId;
-      const answerContent = answers.oldquestionAnswers[questionId] || answers.newquestionAnswers[questionId] || '';
+      const answerContent = questionAnswers[questionId] || '';
 
       // 답변이 비어있지 않다면 allAnswers 배열에 추가
       if (answerContent.trim() !== '') {
@@ -108,6 +113,13 @@ function QuestionPage() {
           questionId: questionId,
           content: answerContent
         });
+      } else {
+        // 답변이 없는 경우, content에 null을 넣고 배열에 추가 및 재발송 예정
+        allAnswers.push({
+          questionId: questionId,
+          content: null
+        });
+        notAnswered.push(questionId);
       }
     });
     // 모든 답변이 수집되었다면 API 호출을 수행합니다.
@@ -116,8 +128,20 @@ function QuestionPage() {
         questions: allAnswers
       });
       if (response.status === 201) {
-        showToast('모든 답변이 성공적으로 제출되었습니다.');
-        setIsAllAnswersSubmitted(true); // 모든 답변 제출 완료 상태 업데이트
+        if (notAnswered.length === 0) {
+          alert('모든 답변이 제출되었습니다.');
+        } else {
+          alert(`답변이 제출되었습니다. \n답변이 없는 ${notAnswered.length}개의 질문은 다음날 재발송드립니다.`);
+          // 모든 답변 제출 완료 상태 업데이트 및 재발송 예정 상태 설정
+          setIsAllAnswersSubmitted(true);
+          setQuestionAnswers(prev => {
+            const updatedAnswers = { ...prev };
+            notAnswered.forEach(questionId => {
+              updatedAnswers[questionId] = '재발송 예정';
+            });
+            return updatedAnswers;
+          });
+        }
       } else {
         showToast('답변 제출 중 예상치 못한 오류가 발생했습니다.');
       }
@@ -126,8 +150,6 @@ function QuestionPage() {
       showToast('답변 제출에 실패했습니다.');
     }
   };
-
-
 
   /* 토클 처리 부분 */
   // 재발송 질문 클릭 처리 함수
@@ -177,23 +199,19 @@ function QuestionPage() {
     event.target.style.height = `${event.target.scrollHeight}px`; // scrollHeight를 사용하여 실제 텍스트 높이에 맞게 높이를 설정합니다.
   }
 
-  const handleAnswerChange = (questionType, questionKey, value) => {
+  const handleAnswerChange = (questionId, value) => {
     // 기존 답변 상태 업데이트
     const newAnswers = {
-      ...answers,
-      [questionType]: { ...answers[questionType], [questionKey]: value }
+      ...questionAnswers,
+      [questionId]: value
     };
 
     // 답변 상태 업데이트
-    setAnswers(newAnswers);
+    setQuestionAnswers(newAnswers);
 
     // 입력된 텍스트가 있을 경우, 'answered' 상태를 true로 설정
     if (value.trim() !== '') {
-      if (questionType === 'oldquestionAnswers') {
-        setClickedoldQuestions({ ...clickedoldQuestions, [questionKey]: true });
-      } else if (questionType === 'newquestionAnswers') {
-        setClickedNewQuestions({ ...clickedNewQuestions, [questionKey]: true });
-      }
+      setClickedoldQuestions({ ...clickedoldQuestions, [questionId]: true });
     }
   };
 
@@ -247,9 +265,9 @@ function QuestionPage() {
             {oldquestions.map((question, index) => {
               const questionId = question.questionId; // questionKey 대신 questionId를 사용
               const isExpanded = expandedoldquestion === questionId;
-              const currentAnswer = answers.oldquestionAnswers[questionId] || ''; // 현재 질문에 대한 답변
+              const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
               const isClicked = clickedoldQuestions[questionId]; // 이 질문이 클릭되었는지 확인
-              const hasAnswer = !!answers.oldquestionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
+              const hasAnswer = !!questionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
               return (
                 <div key={index} className="container">
                   <div className="question-container">
@@ -286,20 +304,20 @@ function QuestionPage() {
                     <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                       <textarea
                         value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
-                        // disabled={answeredoldQuestions[questionId] || isAllAnswersSubmitted}
-                        onChange={(e) => handleAnswerChange('oldquestionAnswers', questionId, e.target.value)}
+                        disabled={answeredQuestions[questionId] || isAllAnswersSubmitted}
+                        onChange={(e) => handleAnswerChange(questionId, e.target.value)}
                         onInput={autoResizeTextarea}
                         className="answer-textarea"
                         placeholder="답변을 입력해주세요."></textarea>
                       <div
                         onClick={() => { saveToResend(questionId); }}
-                        className={`button next-mail ${(answeredoldQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                        className={`button next-mail ${(answeredQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
                       >
                         다음에 답하기
                       </div>
                       <div
                         onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }}
-                        className={`button answer-complete ${(answeredoldQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                        className={`button answer-complete ${(answeredQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
                       >
                         답변 완료
                       </div>
@@ -332,9 +350,9 @@ function QuestionPage() {
           {newquestions.map((question, index) => {
             const questionId = question.questionId;
             const isExpanded = expandedNewQuestion === questionId;
-            const currentAnswer = answers.newquestionAnswers[questionId] || ''; // 현재 질문에 대한 답변
+            const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
             const isClicked = clickedNewQuestions[questionId]; // 클릭 상태 확인
-            const hasAnswer = !!answers.newquestionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
+            const hasAnswer = !!questionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
             return (
               <div key={index} className="container">
                 <div className="question-container">
@@ -371,18 +389,18 @@ function QuestionPage() {
                   <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
                     <textarea
                       value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
-                      // disabled={answeredNewQuestions[questionId] || isAllAnswersSubmitted}
-                      onChange={(e) => handleAnswerChange('newquestionAnswers', questionId, e.target.value)}
+                      disabled={answeredQuestions[questionId] || isAllAnswersSubmitted}
+                      onChange={(e) => handleAnswerChange(questionId, e.target.value)}
                       className="answer-textarea"
                       placeholder="답변을 입력해주세요."></textarea>
                     <div
                       onClick={() => { saveToResend(questionId); }}
-                      className={`button next-mail ${(answeredNewQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      className={`button next-mail ${(answeredQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
                     >
                       다음에 답하기
                     </div>
                     <div
-                      onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }} className={`button answer-complete ${(answeredNewQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }} className={`button answer-complete ${(answeredQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
                     >
                       답변 완료
                     </div>

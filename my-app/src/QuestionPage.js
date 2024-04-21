@@ -24,8 +24,8 @@ function QuestionPage() {
 
 
   //API 연동을 위한 기본 정의
-  const baseUrl = "https://api.startingblock.co.kr";
-  // const baseUrl = "http://127.0.0.1:3001";
+  // const baseUrl = "https://api.startingblock.co.kr";
+  const baseUrl = "http://127.0.0.1:3001";
 
 
   useEffect(() => { // 사이트 접속 시 데이터 초기 데이터 불러오는 메소드

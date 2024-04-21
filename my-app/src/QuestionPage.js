@@ -24,8 +24,8 @@ function QuestionPage() {
 
 
   //API 연동을 위한 기본 정의
-  // const baseUrl = "https://api.startingblock.co.kr";
-  const baseUrl = "http://127.0.0.1:3001";
+  const baseUrl = "https://api.startingblock.co.kr";
+  // const baseUrl = "http://127.0.0.1:3001";
 
 
   useEffect(() => { // 사이트 접속 시 데이터 초기 데이터 불러오는 메소드
@@ -253,6 +253,12 @@ function QuestionPage() {
 
 
       <div className="main">
+        {oldquestions.length === 0 && newquestions.length === 0 && (
+
+          <div>등록된 질문이 없습니다</div>
+        )}
+
+
         {/* 재발송 질문 */}
         {oldquestions.length > 0 && (
           <div className='oldQuestion'>
@@ -339,78 +345,78 @@ function QuestionPage() {
         )}
 
 
-
-        <div className='newQuestion'>
-          <h1>신규 질문</h1>
-          <div className="header-container-list">
-            <div className="header-textbox-question">질문</div>
-            <div className="divider-line"></div>
-            <div className="header-textbox-answer">답변</div>
-          </div>
-          {newquestions.map((question, index) => {
-            const questionId = question.questionId;
-            const isExpanded = expandedNewQuestion === questionId;
-            const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
-            const isClicked = clickedNewQuestions[questionId]; // 클릭 상태 확인
-            const hasAnswer = !!questionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
-            return (
-              <div key={index} className="container">
-                <div className="question-container">
-                  <div
-                    className={`list question-list ${isExpanded && 'hide'}`}
-                    onClick={() => {
-                      toggleNewQuestion(questionId); // 토글 함수 호출
-                      handleNewQuestionClick(questionId); // 클릭 처리 함수 호출
-                    }}>
-                    <div className={`question-item ${isClicked ? 'clicked' : ''}`}>
-                      <span className="icon"></span>
+        {newquestions.length > 0 && (
+          <div className='newQuestion'>
+            <h1>신규 질문</h1>
+            <div className="header-container-list">
+              <div className="header-textbox-question">질문</div>
+              <div className="divider-line"></div>
+              <div className="header-textbox-answer">답변</div>
+            </div>
+            {newquestions.map((question, index) => {
+              const questionId = question.questionId;
+              const isExpanded = expandedNewQuestion === questionId;
+              const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
+              const isClicked = clickedNewQuestions[questionId]; // 클릭 상태 확인
+              const hasAnswer = !!questionAnswers[questionId]; // 이 부분에서 답변 상태를 확인합니다.
+              return (
+                <div key={index} className="container">
+                  <div className="question-container">
+                    <div
+                      className={`list question-list ${isExpanded && 'hide'}`}
+                      onClick={() => {
+                        toggleNewQuestion(questionId); // 토글 함수 호출
+                        handleNewQuestionClick(questionId); // 클릭 처리 함수 호출
+                      }}>
+                      <div className={`question-item ${isClicked ? 'clicked' : ''}`}>
+                        <span className="icon"></span>
+                        <span>{question.content}</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
+                      onClick={() => toggleNewQuestion(questionId)}>
+                      <span className="detail-icon"></span>
                       <span>{question.content}</span>
                     </div>
                   </div>
-                  <div
-                    className={`question-detail-content ${isExpanded ? 'show' : 'hide'}`}
-                    onClick={() => toggleNewQuestion(questionId)}>
-                    <span className="detail-icon"></span>
-                    <span>{question.content}</span>
-                  </div>
-                </div>
-                <div className="answer-container">
-                  <div
-                    key={index}
-                    className={`list answer-list ${isExpanded && 'hide'}`}
-                    onClick={() => {
-                      toggleNewQuestion(questionId)
-                      handleNewQuestionClick(questionId);
-                    }}>
-                    <div className={`item answer-item ${hasAnswer ? 'answeredNewQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
-                      <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
-                    </div>
-                  </div>
-                  <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
-                    <textarea
-                      value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
-                      disabled={answeredQuestions[questionId] || isAllAnswersSubmitted}
-                      onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-                      className="answer-textarea"
-                      placeholder="답변을 입력해주세요."></textarea>
+                  <div className="answer-container">
                     <div
-                      onClick={() => { saveToResend(questionId); }}
-                      className={`button next-mail ${(answeredQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
-                    >
-                      다음에 답하기
+                      key={index}
+                      className={`list answer-list ${isExpanded && 'hide'}`}
+                      onClick={() => {
+                        toggleNewQuestion(questionId)
+                        handleNewQuestionClick(questionId);
+                      }}>
+                      <div className={`item answer-item ${hasAnswer ? 'answeredNewQuestions' : ''} ${currentAnswer === '재발송 예정' ? 'pending' : ''}`}>
+                        <span className="text-content">{currentAnswer || '답변을 입력해주세요'}</span>
+                      </div>
                     </div>
-                    <div
-                      onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }} className={`button answer-complete ${(answeredQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
-                    >
-                      답변 완료
+                    <div className={`answer-detail-content ${isExpanded ? 'show' : 'hide'}`}>
+                      <textarea
+                        value={currentAnswer !== '재발송 예정' ? currentAnswer : ''} // textarea의 value를 상태와 연결
+                        disabled={answeredQuestions[questionId] || isAllAnswersSubmitted}
+                        onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                        className="answer-textarea"
+                        placeholder="답변을 입력해주세요."></textarea>
+                      <div
+                        onClick={() => { saveToResend(questionId); }}
+                        className={`button next-mail ${(answeredQuestions[questionId] || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      >
+                        다음에 답하기
+                      </div>
+                      <div
+                        onClick={() => { saveIndividualAnswer(questionId, currentAnswer); }} className={`button answer-complete ${(answeredQuestions[questionId] || !currentAnswer.trim() || isAllAnswersSubmitted) ? 'disabled' : ''}`}
+                      >
+                        답변 완료
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-        </div>
+          </div>)}
       </div>
 
       <div className="done">
@@ -418,9 +424,11 @@ function QuestionPage() {
           <div className="done-text1">소중한 답변 감사합니다</div>
           <div className="done-text2">답변은 지원자들의 궁금증을 해결할 뿐 아닌, 중복 질문에 대한 답변 데이터로 활용됩니다.</div>
           <div className="done-text3">중복된 질문들을 한데 모아, 담당자님의 편의가 상승하는 앞날을 응원하겠습니다</div>
-          <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
-            모든 답변 완료
-          </button>
+          {oldquestions.length !== 0 && newquestions.length !== 0 && (
+            <button onClick={saveAllAnswers} className="done-button" disabled={isAllAnswersSubmitted}>
+              모든 답변 완료
+            </button>
+          )}
         </div>
       </div>
 
@@ -444,8 +452,8 @@ function QuestionPage() {
                 2024 스타팅블록. All rights reserved.
               </div>
               <div className="credits-container2">
-                <a href="#">이용약관</a>
-                <a href="#">개인정보처리방침</a>
+                <a href="https://www.startingblock.co.kr/term">이용약관</a>
+                <a href="https://www.startingblock.co.kr/term">개인정보처리방침</a>
               </div>
             </div>
           </div>

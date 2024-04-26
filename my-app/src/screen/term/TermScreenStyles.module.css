@@ -1,5 +1,5 @@
 @media (min-width: 600px) {
-  body {
+  .termBody {
     padding-right: 40px;
     padding-left: 40px;
   }
@@ -7,7 +7,7 @@
 }
 
 @media (max-width: 600px) {
-  body {
+  .termBody {
     padding-right: 20px;
     padding-left: 20px;
   }
@@ -34,4 +34,11 @@ p {
 
 .content {
   white-space: pre-wrap; /* 줄바꿈, 공백, 탭을 유지하면서 자동 줄바꿈도 적용 */
+}
+
+.TermDivider {
+  padding: 0;
+  margin: 0;
+  width: 100%
+
 }

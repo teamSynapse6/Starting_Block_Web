@@ -254,8 +254,7 @@ function QuestionPage() {
 
       <div className="main">
         {oldquestions.length === 0 && newquestions.length === 0 && (
-
-          <div>등록된 질문이 없습니다</div>
+          null
         )}
 
 
@@ -453,7 +452,7 @@ function QuestionPage() {
               </div>
               <div className="credits-container2">
                 <a href="https://www.startingblock.co.kr/term">이용약관</a>
-                <a href="https://www.startingblock.co.kr/term">개인정보처리방침</a>
+                <a href="https://www.startingblock.co.kr/term#privacyPolicy">개인정보처리방침</a>
               </div>
             </div>
           </div>

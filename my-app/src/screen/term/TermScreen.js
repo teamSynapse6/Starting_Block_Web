@@ -24,7 +24,9 @@ function TermPage() {
     }, [location]); // location 변경 감지
 
     return (
-        <div>
+        <div className={styles.termBody}>
+            <br /><br />
+            <h1 className={styles.TermPageH1}>시냅스(스타팅블록) 약관 및 개인정보 보호</h1>
             <br /><br />
             <h1 className={styles.TermPageH1}>이용약관</h1>
             {terms.map((term, index) => (
@@ -33,6 +35,8 @@ function TermPage() {
                     <p>{term.내용}</p>
                 </div>
             ))}
+            <br /><br />
+            <hr className={styles.TermDivider}></hr>
             <br /><br /><br /><br />
             <h1 id="privacyPolicy" className={styles.TermPageH1}>개인정보 처리방침</h1>
             {PrivateProcess.map((term, index) => (

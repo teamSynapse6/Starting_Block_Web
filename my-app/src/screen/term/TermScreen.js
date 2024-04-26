@@ -12,16 +12,19 @@ function TermPage() {
     useEffect(() => {
         setTerms(termsData);
         setPrivate(privateData);
-
-        // 페이지 로드 후 location.hash에 따라 스크롤
-        if (location.hash) {
-            const id = location.hash.replace("#", "");
-            const element = document.getElementById(id);
-            if (element) {
-                element.scrollIntoView();
+    
+        // 데이터 설정 후 비동기적으로 스크롤 시도
+        setTimeout(() => {
+            if (location.hash) {
+                const id = location.hash.replace("#", "");
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }
             }
-        }
-    }, [location]); // location 변경 감지
+        }, 0);
+    }, [location, termsData, privateData]);
+    
 
     return (
         <div className={styles.termBody}>

@@ -259,7 +259,7 @@ function QuestionPage() {
 
 
         {/* 재발송 질문 */}
-        {oldquestions.length > 0 && (
+        {/* {oldquestions.length > 0 && ( */}
           <div className='oldQuestion'>
             <h1>재발송 질문</h1>
             <div className="header-container-list">
@@ -332,19 +332,19 @@ function QuestionPage() {
               );
             })}
           </div>
-        )}
+        {/* )} */}
 
-        {oldquestions.length > 0 && (
+        {/* {oldquestions.length > 0 && ( */}
           <>
             <hr />
             <div id="toast-container" className={`toast-container ${toast.show ? 'show' : ''}`}>
               {toast.message}
             </div>
           </>
-        )}
+        {/* )} */}
 
 
-        {newquestions.length > 0 && (
+        {/* {newquestions.length > 0 && ( */}
           <div className='newQuestion'>
             <h1>신규 질문</h1>
             <div className="header-container-list">
@@ -415,7 +415,8 @@ function QuestionPage() {
               );
             })}
 
-          </div>)}
+          </div>
+          {/* )} */}
       </div>
 
       <div className="done">

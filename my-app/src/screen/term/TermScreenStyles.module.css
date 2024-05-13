@@ -4,6 +4,19 @@
     padding-left: 40px;
   }
 
+  .TermPageH1 {
+    padding-left: 0;
+    padding-bottom: 10px;
+    margin: 0;
+    font-size: 30px;
+  }
+  
+  .TermPageH2 {
+    font-family: 'S-CoreDream-5Medium';
+    font-size: 20px;
+    color: #3D4144;
+  }
+
 }
 
 @media (max-width: 600px) {
@@ -11,22 +24,24 @@
     padding-right: 20px;
     padding-left: 20px;
   }
+
+  .TermPageH1 {
+    padding-left: 0;
+    padding-bottom: 25px;
+    margin: 0;
+    font-size: px;
+  }
+  
+  .TermPageH2 {
+    font-family: 'S-CoreDream-5Medium';
+    font-size: 18px;
+    color: #3D4144;
+  }
 }
 
 
 
-.TermPageH1 {
-  padding-left: 0;
-  padding-bottom: 10px;
-  margin: 0;
-  font-size: 30px;
-}
 
-.TermPageH2 {
-  font-family: 'S-CoreDream-5Medium';
-  font-size: 20px;
-  color: #3D4144;
-}
 
 p {
   margin-bottom: 40px;

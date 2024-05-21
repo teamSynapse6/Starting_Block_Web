@@ -220,7 +220,7 @@ function QuestionPage() {
     <>
       <div className="header">
         <div className="header-container">
-          <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <a href="https://www.startingblock.co.kr/home" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img src="/images/logo.png" alt="Logo" className="logo" />
             <span className="title">스타팅블록</span>
           </a>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import termsData from '../../data/terms.json'; 
-import privateData from '../../data/PrivateProcess.json'; 
+import termsData from '../../data/terms.json';
+import privateData from '../../data/PrivateProcess.json';
 import styles from './TermScreenStyles.module.css';
 
 function TermPage() {
@@ -12,7 +12,7 @@ function TermPage() {
     useEffect(() => {
         setTerms(termsData);
         setPrivate(privateData);
-    
+
         // 데이터 설정 후 비동기적으로 스크롤 시도
         setTimeout(() => {
             if (location.hash) {
@@ -24,12 +24,15 @@ function TermPage() {
             }
         }, 0);
     }, [location, termsData, privateData]);
-    
+
 
     return (
         <div className={styles.termBody}>
             <br /><br />
             <h1 className={styles.TermPageH1}>시냅스(스타팅블록) 약관 및 개인정보 보호</h1>
+            <br />
+            <b><a href="mailto:﻿superman@test.com?cc=user@dammy.net">메일보내기</a></b>
+            <br /><br />
             <br /><br />
             <h1 className={styles.TermPageH1}>이용약관</h1>
             {terms.map((term, index) => (

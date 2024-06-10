@@ -42,7 +42,6 @@ function QuestionPage() {
     try {
       const response = await axios.get(`${baseUrl}/api/v1/web/question/${params.announcementId}`);
       const data = response.data;
-      console.log('data호출값: ', data);
       setTitle(data.announcementName);
       setAddress(data.detailUrl);
 
@@ -62,7 +61,6 @@ function QuestionPage() {
           questionId: questionId,
           content: content
         });
-        console.log('응답코드:', response.status);
         if (response.status >= 201 && response.status < 300) {
           showToast(`답변이 저장되었습니다.`);
           setAnsweredQuestions(prev => ({ ...prev, [questionIds]: true }));
@@ -85,7 +83,6 @@ function QuestionPage() {
           questionId: questionId,
           content: null
         });
-        console.log('응답코드:', response.status);
         if (response.status >= 201 && response.status < 300) {
           showToast(`이후 해당 질문을 재발송 하겠습니다.`);
           setAnsweredQuestions(prev => ({ ...prev, [questionIds]: true }));
@@ -284,7 +281,6 @@ const saveAllAnswers = async (event) => {
           </div>
           {oldquestions.map((question, index) => {
             const questionId = question.questionId; // questionKey 대신 questionId를 사용
-            console.log(questionId);
             const isExpanded = expandedoldquestion === questionId;
             const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
             const isClicked = clickedoldQuestions[questionId]; // 이 질문이 클릭되었는지 확인
@@ -370,7 +366,6 @@ const saveAllAnswers = async (event) => {
           </div>
           {newquestions.map((question, index) => {
             const questionId = question.questionId;
-            console.log(questionId);
             const isExpanded = expandedNewQuestion === questionId;
             const currentAnswer = questionAnswers[questionId] || ''; // 현재 질문에 대한 답변
             const isClicked = clickedNewQuestions[questionId]; // 클릭 상태 확인

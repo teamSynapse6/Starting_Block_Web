@@ -99,7 +99,7 @@ function QuestionPage() {
 
 // 모든 답변을 저장하는 함수
 const saveAllAnswers = async (event) => {
-  event.preventDefault(); //스크롤 방지를 위한 기본 이벤트 방지
+  event.preventDefault(); // 스크롤 방지를 위한 기본 이벤트 방지
 
   let notAnswered = [];
 
@@ -138,6 +138,7 @@ const saveAllAnswers = async (event) => {
     if (response.status >= 201 && response.status < 300) {
       if (notAnswered.length === 0) {
         alert('모든 답변이 제출되었습니다.');
+        setIsAllAnswersSubmitted(true); // 모든 질문에 답변이 등록된 경우에도 비활성화 설정
       } else {
         alert(`답변이 제출되었습니다. \n답변이 없는 ${notAnswered.length}개의 질문은 다음날 재발송드립니다.`);
         // 모든 답변 제출 완료 상태 업데이트 및 재발송 예정 상태 설정

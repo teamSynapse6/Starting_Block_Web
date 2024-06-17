@@ -1245,3 +1245,21 @@ h1 {
   display: none;
   /* 축소될 때 안 보임 */
 }
+
+/*로딩을 위한 컨테이너*/
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 72px); /* Viewport Height에서 72px 제외 */
+}
+
+.loading-text {
+  font-family: 'S-CoreDream-5Medium';
+  font-size: 20px;
+  color: #000000;
+  margin-top: 40px; /* 로티 애니메이션 아래로 40px 떨어지도록 설정 */
+  text-align: center; /* 텍스트 가운데 정렬 */
+}
+

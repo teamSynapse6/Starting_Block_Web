@@ -31,7 +31,7 @@ function TermPage() {
             <br /><br />
             <h1 className={styles.TermPageH1}>시냅스(스타팅블록) 약관 및 개인정보 보호</h1>
             <br />
-            <b><a href="mailto:﻿superman@test.com?cc=user@dammy.net">메일보내기</a></b>
+            <b><a href="startingblock.synapse@gmail.com">메일보내기</a></b>
             <br /><br />
             <br /><br />
             <h1 className={styles.TermPageH1}>이용약관</h1>
